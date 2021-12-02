@@ -108,4 +108,72 @@ class Solution:
         return [list(x) for x in ans]
 ```
 
+### [211. 添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/design-add-and-search-words-data-structure/)
+
+使用 Trie 前缀树，在 search 的时候需要一小部分 dfs。
+
+```python lc201-1.py
+class WordDictionary:
+    def __init__(self):
+        self.children = [None] * 26 
+        self.end = False 
+
+    def addWord(self, word: str) -> None:
+        node = self 
+        for c in word: 
+            c = ord(c) - ord('a') 
+            if not node.children[c]: node.children[c] = WordDictionary() 
+            node = node.children[c] 
+        node.end = True 
+
+    def search(self, word: str) -> bool:
+        if not word: return self.end 
+        if word[0] == '.': 
+            for i in range(26): 
+                if self.children[i]: 
+                    if self.children[i].search(word[1:]): return True 
+        else: 
+            i = ord(word[0]) - ord('a') 
+            if self.children[i]: return self.children[i].search(word[1:]) 
+        return False 
+
+
+
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)
+```
+
+### [282. 给表达式添加运算符](https://leetcode-cn.com/problems/expression-add-operators/)
+
+需要注意的细节：
+1. 以 0 开头的只有 '0' 才行，其他都不行。
+2. 只是二元运算，第一个数字前面没有符号或操作。
+
+```python lc282-1.py
+class Solution:
+    def addOperators(self, num: str, target: int) -> List[str]:
+        n = len(num) 
+        ans = [] 
+
+        def dfs(pre, cur, idx, res): 
+            # 上一个数，当前算数结果，下一个的下标，当前字符串结果
+            if idx == n: 
+                if cur == target: ans.append(res) 
+                return 
+            for slen in range(1, n - idx + 1): 
+                cur_s = num[idx: idx + slen] 
+                cur_num = int(cur_s) 
+                if cur_s[0] == '0' and len(cur_s) != 1: return 
+                if idx == 0: 
+                    dfs(cur_num, cur + cur_num, idx + slen, res + cur_s) 
+                else: 
+                    dfs(cur_num, cur + cur_num, idx + slen, res + "+" + cur_s) 
+                    dfs(-cur_num, cur - cur_num, idx + slen, res + "-" + cur_s) 
+                    dfs(pre * cur_num, cur - pre + pre * cur_num, idx + slen, res + "*" + cur_s) 
+        
+        dfs(0, 0, 0, "") 
+        return ans 
+```
 

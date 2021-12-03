@@ -24,6 +24,11 @@ Trie 树（又叫「前缀树」或「字典树」）是一种用于快速查询
 * boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。
 * boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。
 
+总的来说，这三种操作都是三步。
+* 第一步从起点开始。
+* 第二步遍历字符串，在没有下一个 node 的时候根据方法的不同进行不同的操作，insert 创造新结点，search return False，startsWith return False，然后要更新 node。
+* 第三步根据方法的返回结果或进行操作，insert 指出这个最后的 node 是叶结点、search 返回当前 node 是不是叶结点，startsWith 返回当前 node 是不是空的。
+
 ```python lc208-1.py
 class Trie:
 
@@ -67,7 +72,7 @@ class Trie:
 # param_3 = obj.startsWith(prefix)
 ```
 
-开始直接创造十万个 node……之后连接。
+开始直接创造十万个 node……之后连接。或者可以下面这样模拟结点。
 
 ```python lc208-2.py 
 class Trie:
@@ -107,12 +112,89 @@ class Trie:
 # param_3 = obj.startsWith(prefix)
 ```
 
-模拟结点。
+### [211. 添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/design-add-and-search-words-data-structure/)
 
-总的来说，这三种操作都是三步。
-* 第一步从起点开始。
-* 第二步遍历字符串，在没有下一个 node 的时候根据方法的不同进行不同的操作，insert 创造新结点，search return False，startsWith return False，然后要更新 node。
-* 第三步根据方法的返回结果或进行操作，insert 指出这个最后的 node 是叶结点、search 返回当前 node 是不是叶结点，startsWith 返回当前 node 是不是空的。
+使用 Trie 前缀树，在 search 的时候需要一小部分 dfs。
+
+```python lc201-1.py
+class WordDictionary:
+    def __init__(self):
+        self.children = [None] * 26 
+        self.end = False 
+
+    def addWord(self, word: str) -> None:
+        node = self 
+        for c in word: 
+            c = ord(c) - ord('a') 
+            if not node.children[c]: node.children[c] = WordDictionary() 
+            node = node.children[c] 
+        node.end = True 
+
+    def search(self, word: str) -> bool:
+        if not word: return self.end 
+        if word[0] == '.': 
+            for i in range(26): 
+                if self.children[i]: 
+                    if self.children[i].search(word[1:]): return True 
+        else: 
+            i = ord(word[0]) - ord('a') 
+            if self.children[i]: return self.children[i].search(word[1:]) 
+        return False 
 
 
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)
+```
+
+### [212. 单词搜索 II](https://leetcode-cn.com/problems/word-search-ii/) 
+
+第一反应不知道怎么做，听说可以用 Trie 之后第二反应是遍历 board 能够组成的字符串把它们都放到 Trie 里，这样肯定存不下。换个思路需要把 words 都存到 Trie 里。
+
+* 要注意 dfs 传入的参数，不仅有当前形成的字符串，还有当前走到了哪一个结点。
+* board 中可能有不止一个满足相同的 word，所以一开始使用 set 自动去重。
+
+```python lc212-1.py 
+# @lc code=start
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        class Trie: 
+            def __init__(self): 
+                self.children = [None] * 26 
+                self.end = False 
+
+            def insert(self, word): 
+                node = self 
+                for c in word: 
+                    c = ord(c) - ord('a') 
+                    if not node.children[c]: node.children[c] = Trie() 
+                    node = node.children[c] 
+                node.end = True 
+            
+        m, n = len(board), len(board[0]) 
+        root = Trie() 
+        ans = set() 
+        for word in words: 
+            root.insert(word) 
+
+        def dfs(x, y, node, cur): 
+            c = board[x][y] 
+            if c == '.': return 
+            node = node.children[ord(c) - ord('a')] 
+            if not node: return 
+            if node.end: 
+                ans.add(cur + c) 
+
+            board[x][y] = '.' 
+            for x1, y1 in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)): 
+                if 0 <= x1 < m and 0 <= y1 < n: 
+                    dfs(x1, y1, node, cur + c) 
+            board[x][y] = c 
+
+        for x in range(m): 
+            for y in range(n): 
+                dfs(x, y, root, "") 
+        return list(ans) 
+```
 

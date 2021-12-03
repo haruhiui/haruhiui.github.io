@@ -87,7 +87,7 @@ class Solution:
 
 上面的写法对于这个用例会 TLE：`[1] * x, 30`。需要先想清楚这个 dfs 执行过程中产生的树是什么样子的，然后剪枝。
 
-感谢 [liweiwei1419](https://leetcode-cn.com/problems/combination-sum-ii/solution/hui-su-suan-fa-jian-zhi-python-dai-ma-java-dai-m-3/) 大佬提供的剪枝思路。简单来说就是同层的相同的都给剪掉，不同层的相同的当然不用管。
+感谢 [liweiwei1419](https://leetcode-cn.com/problems/combination-sum-ii/solution/hui-su-suan-fa-jian-zhi-python-dai-ma-java-dai-m-3/) 大佬提供的剪枝思路。简单来说就是同层的相同的都给剪掉，不同层的相同的当然不用管，可以详细看评论区。
 
 ```python lc40-1.py
 class Solution:
@@ -106,43 +106,6 @@ class Solution:
         
         dfs([], 0, target) 
         return [list(x) for x in ans]
-```
-
-### [211. 添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/design-add-and-search-words-data-structure/)
-
-使用 Trie 前缀树，在 search 的时候需要一小部分 dfs。
-
-```python lc201-1.py
-class WordDictionary:
-    def __init__(self):
-        self.children = [None] * 26 
-        self.end = False 
-
-    def addWord(self, word: str) -> None:
-        node = self 
-        for c in word: 
-            c = ord(c) - ord('a') 
-            if not node.children[c]: node.children[c] = WordDictionary() 
-            node = node.children[c] 
-        node.end = True 
-
-    def search(self, word: str) -> bool:
-        if not word: return self.end 
-        if word[0] == '.': 
-            for i in range(26): 
-                if self.children[i]: 
-                    if self.children[i].search(word[1:]): return True 
-        else: 
-            i = ord(word[0]) - ord('a') 
-            if self.children[i]: return self.children[i].search(word[1:]) 
-        return False 
-
-
-
-# Your WordDictionary object will be instantiated and called as such:
-# obj = WordDictionary()
-# obj.addWord(word)
-# param_2 = obj.search(word)
 ```
 
 ### [282. 给表达式添加运算符](https://leetcode-cn.com/problems/expression-add-operators/)

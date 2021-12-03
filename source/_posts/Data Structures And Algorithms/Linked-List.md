@@ -53,4 +53,26 @@ public:
 };
 ```
 
+### [92. Reverse Linked List II](https://leetcode.com/problems/reverse-linked-list-ii/) 
 
+反转对应区间的链表。用常规做法很容易出错，可以设想每一步的操作都是把当前节点放到已反转的链表的最前面。
+
+```python lc92-1.py
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseBetween(self, head: Optional[ListNode], left: int, right: int) -> Optional[ListNode]:
+        dummy = ListNode(-1, head) 
+        pre, cur = dummy, head
+        for _ in range(left - 1): 
+            pre, cur = pre.next, cur.next 
+        for _ in range(right - left): 
+            tmp = cur.next 
+            cur.next = tmp.next 
+            tmp.next = pre.next 
+            pre.next = tmp 
+        return dummy.next 
+```

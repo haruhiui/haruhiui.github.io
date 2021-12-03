@@ -1,3 +1,12 @@
+---
+title: Other 
+date: 2021-12-02 18:51:08
+categories: 
+  - Data Structures And Algorithms
+tags: 
+  - Data Structures And Algorithms
+  - Other 
+---
 
 ## 博弈论
 
@@ -52,4 +61,7 @@ class Solution:
     def stoneGame(self, piles: List[int]) -> bool:
         return True 
 ```
+
+先手：这个游戏，我有必胜法。
+
 

@@ -4,14 +4,19 @@ date: 2021-12-03 20:04:29
 math: true 
 categories: 
   - Computer Graphics 
+  - Simulation
 tags: 
   - Computer Graphics 
+  - Simulation
   - Rigid 
+typora-root-url: Rigid 
 ---
 
 Rigid 刚体。
 
 刚体不可变形，它的运动就可以看作两部分：平移和旋转。
+
+## Rigid Motion
 
 ### Translation
 
@@ -21,7 +26,7 @@ Rigid 刚体。
 
 需要给出：质量、力。计算得到：速度、位置。
 
-### Rotational
+### Rotation
 
 使用矩阵表示旋转：方便计算但是不直观。
 
@@ -45,9 +50,13 @@ Rigid 刚体。
 
 上图就是更新的过程，实际计算的过程中用不着区分不同时刻的值，直接计算就好。
 
-### Particle Collision Detection and Response 单点检测响应
+![image-20211203215448668](image-20211203215448668.png)
 
-#### Penalty Methods 
+
+
+## Particle Collision Detection and Response 单点检测响应
+
+### Penalty Methods 
 
 距离函数定义：一个点到一个物体表面的最近距离，如果在物体外就是正值，如果在物体内就是负值。
 
@@ -60,21 +69,36 @@ Quadratic Penalty Methods: 碰撞（距离函数小于零）就给出一个倾�
 * 带缓冲：当距离函数小于一定值是就施加一个力。$\bf f = - \it k (\epsilon - \phi(\bf x)) N$​ 。并不能完全避免穿模。
 * Log-Barrier Penalty Method：假设距离函数永不为负。$\bf f = \rho \frac{1}{\phi(\bf x)} N$ 。
 
-#### Impulse Methods
+### Impulse Methods
 
 如果发生距离函数小于零的情况，则：把新的位置改变到最近的表面上。同时也要改变速度，如果法向速度和距离向量的梯度同向则不用管，如果反向则：把法向速度反向并乘一个系数 $\mu_T$，并且把切向速度也乘一个系数 $a$。
 
 （这里有关于 $\mu_T$ 和 $a$ 的关系讨论，没看懂）
 
-### Rigid Collision Detection and Response by Impulse 
+
+
+## Rigid Collision Detection and Response by Impulse 
+
+一个刚体整体的碰撞检测和响应。我们用刚体**质心**的位置、速度、四元数、角速度表示整个刚体。
+
+对一个刚体的坐标和四元数进行修改比较麻烦，修改速度和角速度比较简单，所以我们要尽量修改速度和角速度，在这里我们通过冲量进行这个修改。
+
+检测：计算每个点的坐标，然后计算每个点的距离函数。
+
+发生碰撞时，碰撞点的新速度可以通过单点检测响应的方法计算出来，并且我们已知这个点的速度改变量和冲量的关系：$\bf v_i^{new} - v_i = K j$，其中 $\bf K$ 是可以通过计算得出的，那么我们就可以计算出来冲量 $\bf j$ ，之后我们再让这个冲量作用在质心的速度和角速度上。
+
+![image-20211203220528178](image-20211203220528178.png)
 
 
 
+## Shape Matching 
 
+让每个点拥有自己的位置和速度，可以自己进行碰撞检测和响应，之后把这些点合成一个刚体。
 
-### Shape Matching 
+![image-20211203224700111](image-20211203224700111.png)
 
-
+* 方便计算，容易和点的模型结合
+* 精度不好
 
 
 

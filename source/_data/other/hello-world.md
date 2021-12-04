@@ -51,3 +51,12 @@ other:
 https://yushuaigee.gitee.io/2020/12/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%85%8D%E8%B4%B9%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2(%E4%B8%80)%E2%80%94%E2%80%94%E6%9C%AC%E5%9C%B0%E6%90%AD%E5%BB%BAhexo%E6%A1%86%E6%9E%B6/
 
  -->
+
+[shoka原网站](https://shoka.lostyu.me/)
+
+[ReverseSacle的帮助网站](https://www.reversesacle.com/) 
+
+[自定义permalink](https://donnadie.top/hexo-optimization-permalink/) 我自己用 :title/ 就好了。
+
+[本地和网页都正常显示图片](http://www.itomtan.com/2017/09/29/the-problem-when-use-post-asset-folder/) 使用 typora-root-url 定义资源文件夹。还有一个小问题：复制图片时 typora 会在链接前面加一个 / ，网页中不能显示，需要自己手动删掉。
+

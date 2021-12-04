@@ -2,9 +2,9 @@
 title: Other 
 date: 2021-12-02 18:51:08
 categories: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
 tags: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
   - Other 
 ---
 

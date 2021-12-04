@@ -2,9 +2,9 @@
 title: Trie 
 date: 2021-12-02 20:51:12
 categories: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
 tags: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
   - Trie 
 ---
 

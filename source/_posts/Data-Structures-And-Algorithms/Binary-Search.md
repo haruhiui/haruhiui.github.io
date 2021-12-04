@@ -2,9 +2,9 @@
 title: Binary Search
 date: 2021-11-28 16:43:59
 categories: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
 tags: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
   - Binary Search
 ---
 

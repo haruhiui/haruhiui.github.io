@@ -7,7 +7,7 @@ categories:
 tags: 
   - Computer Graphics 
   - Math 
-typora-root-url: Math/
+typora-root-url: Math
 ---
 
 [markdown 公式编辑](https://www.jianshu.com/p/25f0139637b7) 备忘
@@ -171,8 +171,18 @@ A 是一个旋转矩阵，坐标轴 xyz 经过它的操作就变成了 uvw，也
   透视投影符合透视规律，会近大远小。
 
   透视投影看到的是一个四棱柱 Frustum，要做的分为两步，首先把 Frustum 挤压到正立方体 Cuboid，操作是 $M_{persp \rarr ortho}$，然后再进行一个正交投影 $M_{ortho}$ 。最后的 $M_{persp} = M_{ortho} M_{persp \rarr ortho}$ 。
+  
+  可以使用 field-of-view (fov) （垂直的可视角度）和 aspect ratio （宽高比）来表示一个视锥。
 
-GAMES101 老师讲的这个方法是一个思路，感觉有点复杂，之后看看有没有更简单的方式。
+GAMES101 老师讲的这个推导方法是一个思路，感觉有点复杂，之后看看有没有更简单的方式。
+
+### Canonical Cube to Screen
+
+指 Model、View、Projection transformation，依次进行完之后都被映射到 `[-1, 1]^3` 内。
+
+视口变换：把 `[-1, 1]^3` 变到屏幕空间，操作为 $M_{viewport}$。
+
+![image-20211204145458091](image-20211204145458091.png)
 
 
 

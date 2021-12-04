@@ -2,9 +2,9 @@
 title: DFS
 date: 2021-12-02 18:50:30 
 categories: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
 tags: 
-  - Data Structures And Algorithms
+  - Data Structures and Algorithms
   - DFS
 ---
 

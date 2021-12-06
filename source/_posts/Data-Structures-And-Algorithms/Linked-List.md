@@ -165,3 +165,146 @@ def reverseList(head, foot):
 
 循环中的这四个表达式非常好记。
 
+### [2074. Reverse Nodes in Even Length Groups](https://leetcode.com/problems/reverse-nodes-in-even-length-groups/)
+
+之前的周赛题，将链表结点分组，每组结点个数从 1 开始递增，要是有偶数个结点的话就将这组结点反转。
+
+先贴一个之前写的代码：
+
+```python lc2074-1.py
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseLength(self, head, length): 
+        if not head: return None 
+        prev, curr, succ = head, head, head.next 
+        for i in range(1, length): 
+            if not succ: break 
+            curr = succ 
+            succ = succ.next 
+            curr.next = prev 
+            prev = curr 
+        head.next = succ 
+        return curr 
+    
+    def countGroup(self, head, group): 
+        cnt = 0 
+        while head and cnt < group: 
+            cnt += 1 
+            head = head.next 
+        return cnt 
+    
+    def reverseEvenLengthGroups(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        group = 1 
+        groupCnt = 0 
+        curr = head 
+        while curr:  
+            groupCnt += 1 
+            if group == groupCnt: 
+                if self.countGroup(curr.next, group + 1) % 2 == 0: 
+                    curr.next = self.reverseLength(curr.next, group + 1) 
+                group += 1 
+                groupCnt = 0 
+            curr = curr.next
+        # if lastGroupEnd and groupCnt % 2 == 1 and group % 2 == 1: 
+        #     lastGroupEnd.next = self.reverseLength(lastGroupEnd.next, groupCnt + 1) 
+        return head 
+```
+
+现在看来不用这么麻烦。用类似于上面一题的方法可以写得很短。
+
+```python lc2074-2.py 
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseEvenLengthGroups(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        hair = ListNode(0, head) 
+        pre, cur = hair, head 
+        cnt, group = 0, 1  
+        while True: 
+            
+            if cnt > 0 and cnt % group == 0 or (not head and cnt % 2 == 0): 
+                if group % 2 == 0 or (not head and cnt % 2 == 0): 
+                    while cur.next != head: 
+                        tmp = cur.next 
+                        cur.next = tmp.next 
+                        tmp.next = pre.next 
+                        pre.next = tmp 
+                while cur != head: 
+                    pre = cur 
+                    cur = cur.next 
+                # pre, cur = last_head, head
+                # this is wrong because the previous node of head has changed when we do the reverse 
+                cnt = 0 
+                group += 1 
+            
+            if not head: break 
+            head = head.next 
+            cnt += 1 
+        return hair.next 
+```
+
+这种写法要注意：
+* pre 和 cur 的更新，这道题里要不要反转和 pre、cur 的更新是分开的，要注意他们的更新方式。
+* 最后一组如果是偶数个也要反转，所以要在 if 中加个特殊判断。
+
+### [143. Reorder List](https://leetcode.com/problems/reorder-list/)
+
+用数组存起来先……
+
+```python lc143-1.py
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reorderList(self, head: Optional[ListNode]) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        """
+        nodes = [] 
+        while head: 
+            nodes.append(head) 
+            head = head.next 
+        first, last = 0, len(nodes) - 1 
+        while first < last: 
+            nodes[first].next = nodes[last] 
+            nodes[last].next = nodes[first + 1] 
+            first += 1 
+            last -= 1 
+        nodes[first].next = None
+        return head
+```
+
+如果要用常量空间可以先找到中点，把后半段反转，然后再把这两段每隔一个合并。
+
+```python lc143-2.py
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reorderList(self, head: Optional[ListNode]) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        """
+        if not head: 
+            return head 
+        fast, slow = head, head 
+        while fast and fast.next and fast.next.next: 
+            fast, slow = fast.next.next, slow.next 
+        cur, pre, slow.next = slow.next, None, None 
+        while cur: 
+            cur.next, pre, cur = pre, cur, cur.next 
+        while head and pre: 
+            head.next, pre.next, head, pre = pre, head.next, head.next, pre.next 
+```
+

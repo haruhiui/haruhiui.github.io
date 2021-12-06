@@ -12,6 +12,10 @@ tags:
 typora-root-url: Rigid 
 ---
 
+**本文不保证完全正确**
+
+内容来自 [GAMES103](http://games-cn.org/games103/) 
+
 Rigid 刚体。
 
 刚体不可变形，它的运动就可以看作两部分：平移和旋转。
@@ -46,6 +50,8 @@ Rigid 刚体。
 
 ![image-20211203202800147](image-20211203202800147.png)
 
+### Simulation
+
 ![image-20211203202812343](image-20211203202812343.png)
 
 上图就是更新的过程，实际计算的过程中用不着区分不同时刻的值，直接计算就好。
@@ -73,11 +79,11 @@ Quadratic Penalty Methods: 碰撞（距离函数小于零）就给出一个倾�
 
 如果发生距离函数小于零的情况，则：把新的位置改变到最近的表面上。同时也要改变速度，如果法向速度和距离向量的梯度同向则不用管，如果反向则：把法向速度反向并乘一个系数 $\mu_T$，并且把切向速度也乘一个系数 $a$。
 
+![image-20211206191527207](image-20211206191527207.png)
+
 （这里有关于 $\mu_T$ 和 $a$ 的关系讨论，没看懂）
 
-
-
-## Rigid Collision Detection and Response by Impulse 
+## Rigid Collision Detection and Response by Impulse 刚体整体碰撞检测响应
 
 一个刚体整体的碰撞检测和响应。我们用刚体**质心**的位置、速度、四元数、角速度表示整个刚体。
 

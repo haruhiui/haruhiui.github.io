@@ -10,13 +10,17 @@ tags:
 typora-root-url: Rasterization
 ---
 
+
+
 **本文不保证完全正确。**
 
 **本文还在编写中。**
 
+内容来自 [GAMES101](http://games-cn.org/intro-graphics/)。
+
+Rasterization 光栅化。
 
 
-Rasterization 光栅化
 
 ## Sampling 采样
 
@@ -64,4 +68,12 @@ FXAA：在图象层面上操作，把锯齿换成没有锯齿的。
 TAA：复用上一帧的在这一帧上。
 
 super resolution / super sampling：超采样，从低分辨率得到高分辨率，概念不同但是本质相同。可以用 DLSS。
+
+
+
+## Z-buffering
+
+为了处理远近遮挡的问题，有如下几种办法。
+
+Painter's Algorithm：先画远处的物体再画近处的物体，近处自然会遮挡远处。
 

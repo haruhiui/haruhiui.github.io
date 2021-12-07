@@ -9,8 +9,10 @@ tags:
   - Computer Graphics 
   - Simulation
   - Rigid 
-typora-root-url: Rigid 
+typora-root-url: Rigid
 ---
+
+
 
 **本文不保证完全正确**
 
@@ -18,7 +20,7 @@ typora-root-url: Rigid
 
 Rigid 刚体。
 
-刚体不可变形，它的运动就可以看作两部分：平移和旋转。
+刚体不可变形，它的运动就可以看作两部分：平移和旋转。本文先说明物体的平移、旋转和一般的模拟步骤，然后考虑一个点的碰撞检测和响应，最后是一个刚体的碰撞检测和响应，包括冲量法和形状匹配方法。
 
 ## Rigid Motion
 

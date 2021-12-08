@@ -188,17 +188,17 @@ class Solution:
 
 ## 4 - [2097. Valid Arrangement of Pairs](https://leetcode.com/problems/valid-arrangement-of-pairs/)
 
-重新排列 pairs 使得 `pairs[i][0] == pairs[i-1][0] and pairs[i][1] == pairs[i+1][0]` 。
+重新排列 pairs 使得 `pairs[i][0] == pairs[i-1][0] and pairs[i][1] == pairs[i+1][0]` 。可以抽象成求欧拉通路的问题。
 
 这一题和 332 相似：
 
 [Reconstruct Itinerary - LeetCode](https://leetcode.com/problems/reconstruct-itinerary/)
 
-群内大佬的做法：
+直接看群内大佬的做法，一开始的和精简后的：
 
-[力扣](https://leetcode-cn.com/problems/valid-arrangement-of-pairs/solution/zui-duan-dai-ma-bu-jie-shi-by-freeyourmi-ybkb/)
+[【感谢残酷群！】最短代码不解释](https://leetcode-cn.com/problems/valid-arrangement-of-pairs/solution/zui-duan-dai-ma-bu-jie-shi-by-freeyourmi-ybkb/)
 
-```python
+```python lc2097-1.py
 class Solution:
     def validArrangement(self, pairs: List[List[int]]) -> List[List[int]]:
         def dfs(curr):
@@ -219,4 +219,23 @@ class Solution:
         return [[stack[i], stack[i - 1]] for i in range(len(stack) - 1, 0, -1)]
 ```
 
-先不管了（
+```python lc2097-2.py
+class Solution:
+    def validArrangement(self, pairs: List[List[int]]) -> List[List[int]]:
+        def dfs(curr):
+            while vec[curr]: dfs(vec[curr].pop())
+            stack.append(curr)
+        vec, c, stack = defaultdict(list), Counter(), []
+        for u, v in pairs:
+            c[u] += 1
+            c[v] -= 1z
+            vec[u].append(v)
+        dfs(c.most_common(1)[0][0])
+        return [[stack[i], stack[i - 1]] for i in range(len(stack) - 1, 0, -1)]
+```
+
+第二种会清晰很多。
+
+算法正确性上：一开始找的是出度为 1 的节点，如果没有则要看 `most_common` 返回的是什么，总的来说无伤大雅。每次 dfs 时，进入一个节点肯定有办法出来，因为除了起始点和终止点之外都有偶数个边连接着。
+
+这种算法被称为求解欧拉通路的 Hierholzer 算法。

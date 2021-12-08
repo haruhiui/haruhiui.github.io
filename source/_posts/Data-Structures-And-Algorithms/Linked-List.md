@@ -10,6 +10,8 @@ tags:
 
 Linked List 链表。
 
+面试时要是有链表相关题目，需要问清楚是单链表还是双链表、有没有可能有环。
+
 ## 亿点点练习题
 
 ### [206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)

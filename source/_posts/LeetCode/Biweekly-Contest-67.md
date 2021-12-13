@@ -78,7 +78,27 @@ class Solution:
 
 这道题倒是挺成功的。首先想到是连锁爆炸，先计算爆炸了一次每个炸弹能够炸到的个数，然后基于这个结果计算连锁一次爆炸能够扎到的个数，之后依次计算下去知道结果不再发生变化。
 
-之后马上就可以想到，这不就可以用 floyd 算法来做嘛。 floyd 算法不仅可以用来求多源最短路，还可以类似这样的用来找最大连通区域。
+之后马上就可以想到，这不就可以用 floyd 算法来做嘛。 floyd 算法不仅可以用来求多源最短路，还可以类似这样的用来看每两个点之间是否连通。当然 floyd 算法肯定不是最优的。
+
+类似的 floyd 用法还可以看 [1462. Course Schedule IV](https://leetcode.com/problems/course-schedule-iv/)。这里顺便贴上对应的解法。
+
+```python lc1462-1.py
+class Solution:
+    def checkIfPrerequisite(self, numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:
+        
+        def floydWarshall(reachable, n): 
+            for k in range(n): 
+                for i in range(n): 
+                    for j in range(n): 
+                        reachable[i][j] = reachable[i][j] or (reachable[i][k] and reachable[k][j]) 
+            return reachable 
+        
+        mat = [[False] * numCourses for _ in range(numCourses)] 
+        for pre, suc in prerequisites: 
+            mat[pre][suc] = True 
+        floydWarshall(mat, numCourses) 
+        return [mat[query[0]][query[1]] for query in queries] 
+```
 
 ## 4 - [5937. 序列顺序查询](https://leetcode-cn.com/contest/biweekly-contest-67/problems/sequentially-ordinal-rank-tracker/)
 

@@ -8,9 +8,52 @@ tags:
   - Other 
 ---
 
-## 博弈论
 
-### [292. Nim 游戏](https://leetcode-cn.com/problems/nim-game/)
+
+# Binary Exponentiation
+
+Binary Exponentiation 快速幂算法，或者叫二进制取幂。
+
+LeetCode 模板题：[50. Pow(x, n)](https://leetcode-cn.com/problems/powx-n/)
+
+递归版：
+
+```python bi-exp-recur.py
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        if n < 0: return 1 / self.myPow(x, -n)
+        if n == 0: return 1
+        if n == 1: return x
+        return self.myPow(x * x, n // 2) * (x if n % 2 == 1 else 1)
+```
+
+迭代版：
+
+```python bi-exp-iter-1.py
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        if n < 0: return 1 / self.myPow(x, -n)
+        ans = 1
+        while n:
+            ans *= x if n % 2 == 1 else 1
+            n //= 2
+            x *= x
+        return ans
+```
+
+实现非常简单。
+
+最近经常用这样的语句：`A = expr and B or C` ，表达在是否满足条件时把不同的值赋给 A 。如果把上面的第六行替换成：`ans *= n % 2 == 1 and x or 1` 也会通过全部测试(2021/12/17 共 304 个测试用例)，但是其实是错的，当输入是 0 和 1 时，结果应该是 0 但是输出是 1 。这就是因为 `n % 2 == 1 and x or 1` 的结果，当 `x == 0` 是不管怎样都是 `1` 。
+
+顺手写成了利用短路的形式，没想到还发现了一个 missing text case 。已提交 issue 。
+
+这个故事告诉我们少用 `A = expr and B or C` 这种句式……
+
+
+
+# 博弈论
+
+[292. Nim 游戏](https://leetcode-cn.com/problems/nim-game/)
 
 只要 n 不能被 4 整除即可。
 
@@ -20,7 +63,9 @@ class Solution:
         return n % 4 != 0 
 ```
 
-### [810. 黑板异或游戏](https://leetcode-cn.com/problems/chalkboard-xor-game/)
+
+
+[810. 黑板异或游戏](https://leetcode-cn.com/problems/chalkboard-xor-game/)
 
 > 说到异或我想到之前面试时面试官问的一道题，这里顺便说一下：一个数组里只有一个数字单独出现了一次，其他数字都出现了两次，如何找出这个数字。
 > 对一个数异或偶数次结果都是0，所以把这个数组所有元素进行异或的结果就是单独的数字。
@@ -36,7 +81,9 @@ class Solution:
         return len(nums) % 2 == 0 or reduce(xor, nums) == 0 
 ```
 
-### [877. 石子游戏](https://leetcode-cn.com/problems/stone-game/)
+
+
+[877. 石子游戏](https://leetcode-cn.com/problems/stone-game/)
 
 仍然感谢 [宫水三叶](https://leetcode-cn.com/problems/stone-game/solution/gong-shui-san-xie-jing-dian-qu-jian-dp-j-wn31/) 大佬的解答。
 
@@ -63,8 +110,5 @@ class Solution:
 ```
 
 先手：这个游戏，我有必胜法。
-
-
-
 
 

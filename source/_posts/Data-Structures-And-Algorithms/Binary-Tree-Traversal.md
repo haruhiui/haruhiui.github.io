@@ -12,7 +12,7 @@ tags:
 
 Binary Tree Traversal 二叉树遍历。
 
-前序、中序、后序遍历用到的数据结构都是栈，使用 Python 的 list 来表示栈，有 append() 和 pop() 方法，都是 O(1) 时间。需要注意的是 list 的带参数的 pop(i) 复杂度是 O(n) 。（所以一般如果要用队列的话最好不要用 list 而是用 collections.deque() 的 append() 和 popleft() 来达到 O(1) 。）
+前序、中序、后序遍历用到的数据结构都是栈，使用 Python 的 `list` 来表示栈，有 `append()` 和 `pop()` 方法，都是 `O(1)` 时间。需要注意的是 list 的带参数的 `pop(i)` 复杂度是 `O(n)` 。（所以一般如果要用队列的话最好不要用 `list` 而是用 `collections.deque()` 的 `append()` 和 `popleft()` 来达到 `O(1)` 。）
 
 # 前序遍历
 

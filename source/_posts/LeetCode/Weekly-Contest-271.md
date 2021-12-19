@@ -11,7 +11,7 @@ tags:
 
 ## 1 - [2103. Rings and Rods](https://leetcode.com/problems/rings-and-rods/)
 
-```python
+```python lc2103-1.py
 class Solution:
     def countPoints(self, rings: str) -> int:
         n = len(rings) // 2
@@ -28,7 +28,7 @@ class Solution:
 
 ## 2 - [2104. Sum of Subarray Ranges](https://leetcode.com/problems/sum-of-subarray-ranges/)
 
-```python
+```python lc2104-1.py
 class Solution:
     def subArrayRanges(self, nums: List[int]) -> int:
         n = len(nums)
@@ -52,7 +52,7 @@ O(n^2) 的算法，听说还有 O(n) 的算法。
 
 ## 3 - [2105. Watering Plants II](https://leetcode.com/problems/watering-plants-ii/)
 
-```python
+```python lc2105-1.py
 class Solution:
     def minimumRefill(self, plants: List[int], capacityA: int, capacityB: int) -> int:
         n = len(plants)
@@ -74,7 +74,7 @@ class Solution:
 
 ## 4 - [2106. Maximum Fruits Harvested After at Most K Steps](https://leetcode.com/problems/maximum-fruits-harvested-after-at-most-k-steps/)
 
-```python
+```python lc2106-1.py
 class Solution:
     def maxTotalFruits(self, fruits: List[List[int]], startPos: int, k: int) -> int:
         d = Counter();r = 1;left = Counter();right = Counter()

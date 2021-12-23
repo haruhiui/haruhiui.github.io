@@ -65,7 +65,7 @@ class Solution:
 
 LeetCode 模板题：[94. 二叉树的中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/)
 
-顺序是**左右根**。
+顺序是**左根右**。
 
 ```python inorder-recur.py
 # Definition for a binary tree node.

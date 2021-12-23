@@ -95,4 +95,6 @@ class Solution:
 
 还是基础不足，当时这题想到了 LIS 却不知道怎么 LIS 长度怎么算，还是现学的方法才 ak ……
 
+还有一个小细节，如果这道题把要求非递减改成严格递增该怎么做？[大佬的回答](https://leetcode-cn.com/circle/discuss/wMSHqV/view/qk9OXm/)
+
 !!今年只剩不到两个星期可活了。!!

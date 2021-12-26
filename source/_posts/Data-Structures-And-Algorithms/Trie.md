@@ -8,7 +8,7 @@ tags:
   - Trie 
 ---
 
-## Trie 前缀树。
+# Trie 前缀树。
 
 借鉴自 宫水三叶 大佬的 [【设计数据结构】实现 Trie (前缀树)](https://mp.weixin.qq.com/s?__biz=MzU4NDE3MTEyMA==&mid=2247488490&idx=1&sn=db2998cb0e5f08684ee1b6009b974089&chksm=fd9cb8f5caeb31e3f7f67dba981d8d01a24e26c93ead5491edb521c988adc0798d8acb6f9e9d&token=1006889101&lang=zh_CN#rd)。
 
@@ -16,7 +16,7 @@ Trie 树（又叫「前缀树」或「字典树」）是一种用于快速查询
 
 其核心是使用「边」来代表有无字符，使用「点」来记录是否为「单词结尾」以及「其后续字符串的字符是什么」。
 
-### [208. 实现 Trie (前缀树)](https://leetcode-cn.com/problems/implement-trie-prefix-tree/)
+## [208. 实现 Trie (前缀树)](https://leetcode-cn.com/problems/implement-trie-prefix-tree/)
 
 实现 Trie 类：
 * Trie() 初始化前缀树对象。
@@ -112,7 +112,7 @@ class Trie:
 # param_3 = obj.startsWith(prefix)
 ```
 
-### [211. 添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/design-add-and-search-words-data-structure/)
+## [211. 添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/design-add-and-search-words-data-structure/)
 
 使用 Trie 前缀树，在 search 的时候需要一小部分 dfs。
 
@@ -148,7 +148,7 @@ class WordDictionary:
 # param_2 = obj.search(word)
 ```
 
-### [212. 单词搜索 II](https://leetcode-cn.com/problems/word-search-ii/) 
+## [212. 单词搜索 II](https://leetcode-cn.com/problems/word-search-ii/) 
 
 第一反应不知道怎么做，听说可以用 Trie 之后第二反应是遍历 board 能够组成的字符串把它们都放到 Trie 里，这样肯定存不下。换个思路需要把 words 都存到 Trie 里。
 

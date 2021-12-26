@@ -12,9 +12,9 @@ Linked List 链表。
 
 面试时要是有链表相关题目，需要问清楚是单链表还是双链表、有没有可能有环。
 
-## 亿点点练习题
+# 亿点点练习题
 
-### [206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)
+## [206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)
 
 最基础的反转链表。
 
@@ -55,7 +55,7 @@ public:
 };
 ```
 
-### [92. Reverse Linked List II](https://leetcode.com/problems/reverse-linked-list-ii/) 
+## [92. Reverse Linked List II](https://leetcode.com/problems/reverse-linked-list-ii/) 
 
 反转对应区间的链表。用常规做法很容易出错，可以设想每一步的操作都是把当前节点放到已反转的链表的最前面。
 
@@ -79,7 +79,7 @@ class Solution:
         return dummy.next 
 ```
 
-### [25. Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/)
+## [25. Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/)
 
 按照 k 个一组反转链表。一直不觉得这道题有 hard 的程度。
 
@@ -167,7 +167,7 @@ def reverseList(head, foot):
 
 循环中的这四个表达式非常好记。
 
-### [2074. Reverse Nodes in Even Length Groups](https://leetcode.com/problems/reverse-nodes-in-even-length-groups/)
+## [2074. Reverse Nodes in Even Length Groups](https://leetcode.com/problems/reverse-nodes-in-even-length-groups/)
 
 之前的周赛题，将链表结点分组，每组结点个数从 1 开始递增，要是有偶数个结点的话就将这组结点反转。
 
@@ -256,7 +256,7 @@ class Solution:
 * pre 和 cur 的更新，这道题里要不要反转和 pre、cur 的更新是分开的，要注意他们的更新方式。
 * 最后一组如果是偶数个也要反转，所以要在 if 中加个特殊判断。
 
-### [143. Reorder List](https://leetcode.com/problems/reorder-list/)
+## [143. Reorder List](https://leetcode.com/problems/reorder-list/)
 
 用数组存起来先……
 

@@ -28,11 +28,11 @@ LeetCode 模板题：[236. 二叉树的最近公共祖先](https://leetcode-cn.c
 
 class Solution:
     def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-        def recur(root, p, q):
+        def findLca(root, p, q):
             if root in (None, p, q): return root
-            l, r = recur(root.left, p, q), recur(root.right, p, q)
+            l, r = findLca(root.left, p, q), findLca(root.right, p, q)
             return root if (l and r) else (l or r)
-        return recur(root, p, q)
+        return findLca(root, p, q)
 ```
 
 迭代写法可以参考：[Iterative Solutions in Python/C++](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/discuss/65245/Iterative-Solutions-in-PythonC%2B%2B)
@@ -108,6 +108,30 @@ class Solution:
 
 后面我们经常会看到混沌法和 nonlocal+recur 这两种方法。
 
+# 多个结点都一定在
+
+[1676. 二叉树的最近公共祖先 IV](https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree-iv/)
+
+因为结点一定存在，所以不需要让递归函数返回结点是否存在，直接返回结果即可。也用不到 nonlocal 变量。
+
+```python lc1676-1.py
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', nodes: 'List[TreeNode]') -> 'TreeNode':
+        def findLca(root, nodes):
+            if root in nodes + [None]: return root
+            l, r = findLca(root.left, nodes), findLca(root.right, nodes)
+            if l and r: return root
+            return l or r
+        return findLca(root, nodes)
+```
+
 # 所有深度最深的叶结点 lca
 
 [1123. 最深叶节点的最近公共祖先](https://leetcode-cn.com/problems/lowest-common-ancestor-of-deepest-leaves/) 这道题只是找所有最深的叶结点的 lca。最深的叶结点可能只有一个，可能有两个，也可能有多个。
@@ -153,6 +177,8 @@ class Solution:
         
         return lca
 ```
+
+现在看上面这段简直是黑历史，为什么不直接用多个结点找 LCA 的模板呢。
 
 不过太麻烦了，试试用混沌法做一下。
 

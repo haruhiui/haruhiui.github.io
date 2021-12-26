@@ -37,6 +37,27 @@ class Solution:
 
 迭代写法可以参考：[Iterative Solutions in Python/C++](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/discuss/65245/Iterative-Solutions-in-PythonC%2B%2B)
 
+还有一个二叉搜索树的两个必定存在的 LCA：[235. 二叉搜索树的最近公共祖先](https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-search-tree/)
+
+```python lc235-1.py
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def findLca(root, p, q):
+            if not root: return root
+            if p.val > q.val: p, q = q, p
+            if p.val <= root.val <= q.val: return root
+            if p.val > root.val: return findLca(root.right, p, q)
+            if q.val < root.val: return findLca(root.left, p, q)
+        return findLca(root, p, q)
+```
+
 # 两个结点不一定存在
 
 上面这道题保证 p 和 q 一定存在于这棵树中，如果其中之一不存在的话，需要用其他方法。
@@ -441,5 +462,5 @@ class Solution:
         return ans
 ```
 
-写完这些我只想说，平平淡淡用正常的 lca+dfs 方法不好吗，这都什么玩意。!!累了毁灭吧!!
+写完这些我只想说，平平淡淡用正常的 lca+dfs 方法不好吗，这都什么玩意。!!累了毁灭吧赶紧的!!
 

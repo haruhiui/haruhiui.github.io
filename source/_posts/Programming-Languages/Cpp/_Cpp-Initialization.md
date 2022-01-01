@@ -1,5 +1,5 @@
 ---
-title: Initialization
+title: Cpp Initialization
 date: 2021-12-26 21:48:57
 math: true 
 categories: 
@@ -53,7 +53,8 @@ int main()
     cout << s0 << " " << s1 << " " << s2 << " " << s3 << endl;
 }
 
-/*output:
+/*
+output:
  qwer asdf zxcv
 */
 ```
@@ -91,7 +92,8 @@ int main()
     MyString ms3{"zxcv"};
 }
 
-/* output:
+/* 
+output:
 default ctor 
 const char init ctor qwer
 const char init ctor asdf
@@ -131,13 +133,15 @@ int main()
     MyString ms3{"zxcv"};
 }
 
-/* output (without -fno-elide-constructors):
+/* 
+output (without -fno-elide-constructors):
 default ctor 
 const char init ctor qwer
 const char init ctor asdf
 init_list ctor zxcv
 */
-/* output (with -fno-elide-constructors):
+/* 
+output (with -fno-elide-constructors):
 default ctor 
 const char init ctor qwer
 copy ctor qwer
@@ -196,7 +200,8 @@ int main()
     cout << endl;
     MyString ms4 = func(ms1);
 }
-/*output (without -fno-elide-constructors):
+/*
+output (without -fno-elide-constructors):
 const char init ctor qwer
 copy ctor qwer
 
@@ -204,7 +209,8 @@ copy ctor qwer
 
 copy ctor qwer
 */
-/*output (with -fno-elide-constructors):
+/*
+output (with -fno-elide-constructors):
 const char init ctor qwer
 copy ctor qwer
 

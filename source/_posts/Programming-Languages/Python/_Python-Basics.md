@@ -1,5 +1,5 @@
 ---
-title: Initialization
+title: Python Basics
 date: 2021-12-26 21:48:57
 math: true 
 categories: 

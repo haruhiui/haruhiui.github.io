@@ -1,6 +1,6 @@
 ---
 title: Transformation
-date: 2021-12-20 19:11:57
+date: 2022-01-01 12:45:50
 math: true 
 categories: 
   - Computer Graphics 
@@ -308,7 +308,7 @@ PS D:\Home\Studio\WebGL> node "testGlMatrixTransformation.js"
 上面代码有几个小细节：
 1. OpenGL 的矩阵填充时是按照列填充的，所以输出时是按照列输出的，也就是说程序中的行其实是矩阵的列。[WebGL 矩阵 vs 数学中的矩阵](https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-matrix-vs-math.html)
 2. `mat4.ortho` 和 `mat.perspective` 的 `near` 和 `far` 的意义好像是离相机的距离大小，所以和上面推导出来的结果差一个负号。
-3. `lookAt` 的输出结果可以注意以下。
+3. `lookAt` 的输出结果可以注意以下，分为平移和旋转，旋转用文章开头的说法解释的话是可以肉眼看出来的。
 
 
 

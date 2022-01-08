@@ -83,7 +83,7 @@ vec3 ambient = uLight.ambient * texDiffuse;
 下方点击后，鼠标控制相机方向，wasd空格shift控制相机移动。
 :::
 
-{% iframe "../../code/webgldemo/shading/index.html" 700 500 %}
+{% iframe "../../code/webgldemo/Shading/index.html" 700 500 %}
 
 考虑光照强度衰减之后，顶点着色器和片段着色器全部代码如下：
 

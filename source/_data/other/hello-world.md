@@ -54,7 +54,9 @@ https://yushuaigee.gitee.io/2020/12/31/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%8
 
 [shoka原网站](https://shoka.lostyu.me/)
 
-[ReverseSacle的帮助网站](https://www.reversesacle.com/) 
+[ReverseSacle的网站](https://www.reversesacle.com/) 
+
+[lavenderdh的网站](https://www.lavenderdh.cn/)
 
 [自定义permalink](https://donnadie.top/hexo-optimization-permalink/) 我自己用 :title/ 就好了。
 

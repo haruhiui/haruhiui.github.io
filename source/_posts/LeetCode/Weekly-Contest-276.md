@@ -1,8 +1,13 @@
-title: Weekly Contest 275
+---
+title: Weekly Contest 276
+date: 2022-01-16 21:07:50
+categories:
+  - LeetCode
+tags:
+  - LeetCode
+---
 
-
-
-# [2138. Divide a String Into Groups of Size k](https://leetcode.com/problems/divide-a-string-into-groups-of-size-k/)
+# 1 - [2138. Divide a String Into Groups of Size k](https://leetcode.com/problems/divide-a-string-into-groups-of-size-k/)
 
 ```python
 class Solution:
@@ -18,11 +23,7 @@ class Solution:
         return ans
 ```
 
-
-
-
-
-# [2139. Minimum Moves to Reach Target Score](https://leetcode.com/problems/minimum-moves-to-reach-target-score/)
+# 2 - [2139. Minimum Moves to Reach Target Score](https://leetcode.com/problems/minimum-moves-to-reach-target-score/)
 
 ```python
 class Solution:
@@ -47,7 +48,7 @@ class Solution:
 
 
 
-# [2140. Solving Questions With Brainpower](https://leetcode.com/problems/solving-questions-with-brainpower/)
+# 3 - [2140. Solving Questions With Brainpower](https://leetcode.com/problems/solving-questions-with-brainpower/)
 
 一个错误的写法：
 
@@ -65,22 +66,65 @@ class Solution:
         return ans
 ```
 
+写法一：
 
+```python
+class Solution:
+    def mostPoints(self, questions: List[List[int]]) -> int:
+        n = len(questions)
+        dp = [0] * (n + 1)
+        for i in range(n - 1, -1, -1):
+            p, b = questions[i]
+            j = i + b + 1
+            dp[i] = max(dp[i + 1], p + (dp[j] if j < n else 0))
+        return dp[0]
+```
 
+写法二：
 
+```python
+class Solution:
+    def mostPoints(self, questions: List[List[int]]) -> int:
+        n = len(questions)
+        dp = [0] * (n + 1)
+        for i, (p, b) in enumerate(questions):
+            dp[i + 1] = max(dp[i + 1], dp[i])
+            j = min(i + b + 1, n)
+            dp[j] = max(dp[j], dp[i] + p)
+        return dp[n]
+```
 
+参考链接：[两种 DP 做法：倒序填表 / 正序刷表](https://leetcode-cn.com/problems/solving-questions-with-brainpower/solution/dao-xu-dp-by-endlesscheng-2qkc/)
 
+# 4 - [2141. Maximum Running Time of N Computers](https://leetcode.com/problems/maximum-running-time-of-n-computers/)
 
-[灵茶山艾府](https://leetcode-cn.com/u/endlesscheng/) [](https://leetcode-cn.com/problems/solving-questions-with-brainpower/solution/dao-xu-dp-by-endlesscheng-2qkc/)
+写法一：
 
+```python
+class Solution:
+    def maxRunTime(self, n: int, batteries: List[int]) -> int:
+        l, r = 0, sum(batteries) // n
+        while l < r:
+            x = (l + r + 1) // 2
+            if n * x <= sum(min(b, x) for b in batteries): l = x
+            else: r = x - 1
+        return l
+```
 
+```python
+class Solution:
+    def maxRunTime(self, n: int, batteries: List[int]) -> int:
+        batteries.sort(reverse=True)
+        s = sum(batteries)
+        for b in batteries:
+            if b <= s // n: return s // n
+            s -= b
+            n -= 1
+```
 
+参考链接：[两种做法：二分答案 / 排序+贪心（附详细证明）](https://leetcode-cn.com/problems/maximum-running-time-of-n-computers/solution/liang-chong-jie-fa-er-fen-da-an-pai-xu-t-grd8/)
 
+[灵茶山艾府](https://leetcode-cn.com/u/endlesscheng/)大佬真是太牛了。没想到也是浙大的。
 
-# [2141. Maximum Running Time of N Computers](https://leetcode.com/problems/maximum-running-time-of-n-computers/)
+这次周赛可以说是今年最糟糕的，足以载入黑历史了……加班到没时间刷题，爷累了。
 
-
-
-
-
-[](https://leetcode-cn.com/problems/maximum-running-time-of-n-computers/solution/liang-chong-jie-fa-er-fen-da-an-pai-xu-t-grd8/)

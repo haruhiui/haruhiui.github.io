@@ -85,6 +85,8 @@ vec3 ambient = uLight.ambient * texDiffuse;
 
 {% iframe "../../code/webgldemo/Shading/index.html" 700 500 %}
 
+以上的代码可以去我的 Github 上寻找。webglUtils 部分参考自 [webgl-fundamentals](https://github.com/gfxfundamentals/webgl-fundamentals/blob/master/webgl/resources/webgl-utils.js)。
+
 考虑光照强度衰减之后，顶点着色器和片段着色器全部代码如下：
 
 ```glsl

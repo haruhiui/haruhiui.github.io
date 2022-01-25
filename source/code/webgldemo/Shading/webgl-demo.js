@@ -20,9 +20,10 @@ class Camera {
     right = [1, 0, 0];
 
     // movement
-    forwardSpeed = 0;
-    rightSpeed = 0;
-    worldUpSpeed = 0;
+    forwardMove = 0;
+    rightMove = 0;
+    worldUpMove = 0;
+    staticMoveSpeed = 0;
 
     constructor(aspect, near, far) {
         this.aspect = aspect;
@@ -51,10 +52,11 @@ class Camera {
         vec3.normalize(this.front, this.front);
     }
 
-    setSpeed(fs, rs, wus) {
-        this.forwardSpeed = fs || 0;
-        this.rightSpeed = rs || 0;
-        this.worldUpSpeed = wus || 0;
+    setMove(fs, rs, wus, sms) {
+        this.forwardMove = fs || 0;
+        this.rightMove = rs || 0;
+        this.worldUpMove = wus || 0;
+        this.staticMoveSpeed = sms || 0;
     }
 
     // view matrix and projection matrix
@@ -79,14 +81,19 @@ class Camera {
         if (!vec3.equals(newUp, [0, 0, 0])) vec3.normalize(this.up, newUp);
 
         // move by speed
-        if (this.forwardSpeed) {
-            vec3.scaleAndAdd(this.position, this.position, this.front, this.forwardSpeed * deltaTime);
-        }
-        if (this.rightSpeed) {
-            vec3.scaleAndAdd(this.position, this.position, this.right, this.rightSpeed * deltaTime);
-        }
-        if (this.worldUpSpeed) {
-            vec3.scaleAndAdd(this.position, this.position, this.worldUp, this.worldUpSpeed * deltaTime);
+        if (this.staticMoveSpeed) { // 以固定的速度移动，否则相机朝上时按w并按空格会比较快
+            let dir = vec3.create();
+            vec3.scaleAndAdd(dir, dir, this.front, this.forwardMove);
+            vec3.scaleAndAdd(dir, dir, this.right, this.rightMove);
+            vec3.scaleAndAdd(dir, dir, this.worldUp, this.worldUpMove);
+            vec3.normalize(dir, dir);
+            vec3.scaleAndAdd(this.position, this.position, dir, this.staticMoveSpeed * deltaTime);
+        } else {
+            let delta = vec3.create();
+            vec3.scaleAndAdd(delta, delta, this.front, this.forwardMove * deltaTime);
+            vec3.scaleAndAdd(delta, delta, this.right, this.rightMove * deltaTime);
+            vec3.scaleAndAdd(delta, delta, this.worldUp, this.worldUpMove * deltaTime);
+            vec3.add(this.position, this.position, delta);
         }
     }
 };
@@ -101,6 +108,7 @@ class Control {
     static forwardMoveEnabled = true;
     static rightMoveEnabled = true;
     static worldUpMoveEnabled = true;
+    static staticMoveMode = true;
 
     // keyboard down
     static _wDown = false;
@@ -128,6 +136,8 @@ class Control {
 
         Control.canvas.onclick = Control.onClick;
         document.addEventListener("pointerlockchange", Control.onPointerLockChange, false);
+
+        window.onresize = Control.onResize;
     }
 
     fini() {
@@ -166,14 +176,14 @@ class Control {
         if (e.keyCode == 16) Control._shiftDown = true;
         if (e.keyCode == 32) Control._spaceDown = true;
 
-        let forwardSpeed = Control.forwardMoveEnabled && (Number(Control._wDown) - Number(Control._sDown)) * Control.moveScale || 0;
-        let rightSpeed = Control.rightMoveEnabled && (Number(Control._dDown) - Number(Control._aDown)) * Control.moveScale || 0;
-        let worldUpSpeed = Control.worldUpMoveEnabled && (Number(Control._spaceDown) - Number(Control._shiftDown)) * Control.moveScale || 0;
-        if (Control.camera.forwardSpeed != forwardSpeed || 
-            Control.camera.rightSpeed != rightSpeed || 
-            Control.camera.worldUpSpeed != worldUpSpeed) 
+        let forwardMove = Control.forwardMoveEnabled && (Number(Control._wDown) - Number(Control._sDown)) * Control.moveScale || 0;
+        let rightMove = Control.rightMoveEnabled && (Number(Control._dDown) - Number(Control._aDown)) * Control.moveScale || 0;
+        let worldUpMove = Control.worldUpMoveEnabled && (Number(Control._spaceDown) - Number(Control._shiftDown)) * Control.moveScale || 0;
+        if (Control.camera.forwardMove != forwardMove || 
+            Control.camera.rightMove != rightMove || 
+            Control.camera.worldUpMove != worldUpMove)
         {
-            Control.camera.setSpeed(forwardSpeed, rightSpeed, worldUpSpeed);
+            Control.camera.setMove(forwardMove, rightMove, worldUpMove, Control.staticMoveMode && Control.moveScale);
         }
     }
     static onKeyUp(e) {
@@ -184,19 +194,36 @@ class Control {
         if (e.keyCode == 16) Control._shiftDown = false;
         if (e.keyCode == 32) Control._spaceDown = false;
 
-        let forwardSpeed = Control.forwardMoveEnabled && (Number(Control._wDown) - Number(Control._sDown)) * Control.moveScale || 0;
-        let rightSpeed = Control.rightMoveEnabled && (Number(Control._dDown) - Number(Control._aDown)) * Control.moveScale || 0;
-        let worldUpSpeed = Control.worldUpMoveEnabled && (Number(Control._spaceDown) - Number(Control._shiftDown)) * Control.moveScale || 0;
-        if (Control.camera.forwardSpeed != forwardSpeed ||
-            Control.camera.rightSpeed != rightSpeed || 
-            Control.camera.worldUpSpeed != worldUpSpeed) 
+        let forwardMove = Control.forwardMoveEnabled && (Number(Control._wDown) - Number(Control._sDown)) * Control.moveScale || 0;
+        let rightMove = Control.rightMoveEnabled && (Number(Control._dDown) - Number(Control._aDown)) * Control.moveScale || 0;
+        let worldUpMove = Control.worldUpMoveEnabled && (Number(Control._spaceDown) - Number(Control._shiftDown)) * Control.moveScale || 0;
+        if (Control.camera.forwardMove != forwardMove ||
+            Control.camera.rightMove != rightMove || 
+            Control.camera.worldUpMove != worldUpMove)
         {
-            Control.camera.setSpeed(forwardSpeed, rightSpeed, worldUpSpeed);
+            Control.camera.setMove(forwardMove, rightMove, worldUpMove, Control.staticMoveMode && Control.moveScale);
         }
+    }
+
+    static onResize(e) {
+        location.reload();
+        // 对于改变窗口大小后强制刷新导致相机不是改变窗口大小前的位置的问题暂时无法解决
     }
 };
 
+// Learned from webgl-fundamentals: https://github.com/gfxfundamentals/webgl-fundamentals/blob/master/webgl/resources/webgl-utils.js
 class webglUtils {
+    // resize canvas
+    static resizeCanvas(canvas) {
+        let displayWidth = canvas.clientWidth;
+        let displayHeight = canvas.clientHeight;
+
+        if (canvas.width != displayWidth || canvas.height != displayHeight) {
+            canvas.width = displayWidth;
+            canvas.height = displayHeight;
+        }
+    }
+
     // Initialize a shader program
     static initShaderProgram(gl, vsSource, fsSource) {
         const vertexShader = webglUtils.loadShader(gl, gl.VERTEX_SHADER, vsSource);
@@ -228,10 +255,7 @@ class webglUtils {
         return shader;
     }
 
-    //
-    // Initialize a texture and load an image.
-    // When the image finished loading copy it into the texture.
-    //
+    // Initialize a texture and load an image. When the image finished loading copy it into the texture.
     static loadTexture(gl, url) {
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -261,7 +285,9 @@ class webglUtils {
             // WebGL1 has different requirements for power of 2 images
             // vs non power of 2 images so check if the image is a
             // power of 2 in both dimensions.
-            if (webglUtils.isPowerOf2(image.width) && webglUtils.isPowerOf2(image.height)) {
+            // let isPowerOf2 = function(x) { return (x & (x - 1)) == 0; }
+            let isPowerOf2 = (x) => { return (x & (x - 1)) == 0; }
+            if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
                 // Yes, it's a power of 2. Generate mips.
                 // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -283,8 +309,729 @@ class webglUtils {
         return texture;
     }
 
-    static isPowerOf2(value) {
-        return (value & (value - 1)) == 0;
+    /**
+     * Returns the corresponding bind point for a given sampler type
+     */
+    static getBindPointForSamplerType(gl, type) {
+        if (type === gl.SAMPLER_2D)   return gl.TEXTURE_2D;        // eslint-disable-line
+        if (type === gl.SAMPLER_CUBE) return gl.TEXTURE_CUBE_MAP;  // eslint-disable-line
+        return undefined;
+    }
+
+    /**
+     * Creates setter functions for all uniforms of a shader
+     * program.
+     *
+     * @see {@link module:webgl-utils.setUniforms}
+     *
+     * @param {WebGLProgram} program the program to create setters for.
+     * @returns {Object.<string, function>} an object with a setter by name for each uniform
+     * @memberOf module:webgl-utils
+     */
+    static createUniformSetters(gl, program) {
+        let textureUnit = 0;
+
+        /**
+         * Creates a setter for a uniform of the given program with it's
+         * location embedded in the setter.
+         * @param {WebGLProgram} program
+         * @param {WebGLUniformInfo} uniformInfo
+         * @returns {function} the created setter.
+         */
+        function createUniformSetter(program, uniformInfo) {
+            const location = gl.getUniformLocation(program, uniformInfo.name);
+            const type = uniformInfo.type;
+            // Check if this uniform is an array
+            const isArray = (uniformInfo.size > 1 && uniformInfo.name.substr(-3) === '[0]');
+            if (type === gl.FLOAT && isArray) {
+                return function(v) {
+                    gl.uniform1fv(location, v);
+                };
+            }
+            if (type === gl.FLOAT) {
+                return function(v) {
+                    gl.uniform1f(location, v);
+                };
+            }
+            if (type === gl.FLOAT_VEC2) {
+                return function(v) {
+                    gl.uniform2fv(location, v);
+                };
+            }
+            if (type === gl.FLOAT_VEC3) {
+                return function(v) {
+                    gl.uniform3fv(location, v);
+                };
+            }
+            if (type === gl.FLOAT_VEC4) {
+                return function(v) {
+                    gl.uniform4fv(location, v);
+                };
+            }
+            if (type === gl.INT && isArray) {
+                return function(v) {
+                    gl.uniform1iv(location, v);
+                };
+            }
+            if (type === gl.INT) {
+                return function(v) {
+                    gl.uniform1i(location, v);
+                };
+            }
+            if (type === gl.INT_VEC2) {
+                return function(v) {
+                    gl.uniform2iv(location, v);
+                };
+            }
+            if (type === gl.INT_VEC3) {
+                return function(v) {
+                    gl.uniform3iv(location, v);
+                };
+            }
+            if (type === gl.INT_VEC4) {
+                return function(v) {
+                    gl.uniform4iv(location, v);
+                };
+            }
+            if (type === gl.BOOL) {
+                return function(v) {
+                    gl.uniform1iv(location, v);
+                };
+            }
+            if (type === gl.BOOL_VEC2) {
+                return function(v) {
+                    gl.uniform2iv(location, v);
+                };
+            }
+            if (type === gl.BOOL_VEC3) {
+                return function(v) {
+                    gl.uniform3iv(location, v);
+                };
+            }
+            if (type === gl.BOOL_VEC4) {
+                return function(v) {
+                    gl.uniform4iv(location, v);
+                };
+            }
+            if (type === gl.FLOAT_MAT2) {
+                return function(v) {
+                    gl.uniformMatrix2fv(location, false, v);
+                };
+            }
+            if (type === gl.FLOAT_MAT3) {
+                return function(v) {
+                    gl.uniformMatrix3fv(location, false, v);
+                };
+            }
+            if (type === gl.FLOAT_MAT4) {
+                return function(v) {
+                    gl.uniformMatrix4fv(location, false, v);
+                };
+            }
+            if ((type === gl.SAMPLER_2D || type === gl.SAMPLER_CUBE) && isArray) {
+                const units = [];
+                for (let ii = 0; ii < info.size; ++ii) {
+                    units.push(textureUnit++);
+                }
+                return function(bindPoint, units) {
+                    return function(textures) {
+                        gl.uniform1iv(location, units);
+                        textures.forEach(function(texture, index) {
+                            gl.activeTexture(gl.TEXTURE0 + units[index]);
+                            gl.bindTexture(bindPoint, texture);
+                        });
+                    };
+                } (webglUtils.getBindPointForSamplerType(gl, type), units);
+            }
+            if (type === gl.SAMPLER_2D || type === gl.SAMPLER_CUBE) {
+                return function(bindPoint, unit) {
+                    return function(texture) {
+                        gl.uniform1i(location, unit);
+                        gl.activeTexture(gl.TEXTURE0 + unit);
+                        gl.bindTexture(bindPoint, texture);
+                    };
+                } (webglUtils.getBindPointForSamplerType(gl, type), textureUnit++);
+            }
+            throw ('unknown type: 0x' + type.toString(16)); // we should never get here.
+        }
+
+        const uniformSetters = { };
+        const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+
+        for (let ii = 0; ii < numUniforms; ++ii) {
+            const uniformInfo = gl.getActiveUniform(program, ii);
+            if (!uniformInfo) {
+                break;
+            }
+            let name = uniformInfo.name;
+            // remove the array suffix.
+            if (name.substr(-3) === '[0]') {
+                name = name.substr(0, name.length - 3);
+            }
+            const setter = createUniformSetter(program, uniformInfo);
+            uniformSetters[name] = setter;
+        }
+        return uniformSetters;
+    }
+
+    /**
+     * Set uniforms and binds related textures.
+     *
+     * Example:
+     *
+     *     let programInfo = createProgramInfo(
+     *         gl, ["some-vs", "some-fs"]);
+     *
+     *     let tex1 = gl.createTexture();
+     *     let tex2 = gl.createTexture();
+     *
+     *     ... assume we setup the textures with data ...
+     *
+     *     let uniforms = {
+     *       u_someSampler: tex1,
+     *       u_someOtherSampler: tex2,
+     *       u_someColor: [1,0,0,1],
+     *       u_somePosition: [0,1,1],
+     *       u_someMatrix: [
+     *         1,0,0,0,
+     *         0,1,0,0,
+     *         0,0,1,0,
+     *         0,0,0,0,
+     *       ],
+     *     };
+     *
+     *     gl.useProgram(program);
+     *
+     * This will automatically bind the textures AND set the
+     * uniforms.
+     *
+     *     setUniforms(programInfo.uniformSetters, uniforms);
+     *
+     * For the example above it is equivalent to
+     *
+     *     let texUnit = 0;
+     *     gl.activeTexture(gl.TEXTURE0 + texUnit);
+     *     gl.bindTexture(gl.TEXTURE_2D, tex1);
+     *     gl.uniform1i(u_someSamplerLocation, texUnit++);
+     *     gl.activeTexture(gl.TEXTURE0 + texUnit);
+     *     gl.bindTexture(gl.TEXTURE_2D, tex2);
+     *     gl.uniform1i(u_someSamplerLocation, texUnit++);
+     *     gl.uniform4fv(u_someColorLocation, [1, 0, 0, 1]);
+     *     gl.uniform3fv(u_somePositionLocation, [0, 1, 1]);
+     *     gl.uniformMatrix4fv(u_someMatrix, false, [
+     *         1,0,0,0,
+     *         0,1,0,0,
+     *         0,0,1,0,
+     *         0,0,0,0,
+     *       ]);
+     *
+     * Note it is perfectly reasonable to call `setUniforms` multiple times. For example
+     *
+     *     let uniforms = {
+     *       u_someSampler: tex1,
+     *       u_someOtherSampler: tex2,
+     *     };
+     *
+     *     let moreUniforms {
+     *       u_someColor: [1,0,0,1],
+     *       u_somePosition: [0,1,1],
+     *       u_someMatrix: [
+     *         1,0,0,0,
+     *         0,1,0,0,
+     *         0,0,1,0,
+     *         0,0,0,0,
+     *       ],
+     *     };
+     *
+     *     setUniforms(programInfo.uniformSetters, uniforms);
+     *     setUniforms(programInfo.uniformSetters, moreUniforms);
+     *
+     * @param {Object.<string, function>|module:webgl-utils.ProgramInfo} setters the setters returned from
+     *        `createUniformSetters` or a ProgramInfo from {@link module:webgl-utils.createProgramInfo}.
+     * @param {Object.<string, value>} an object with values for the
+     *        uniforms.
+     * @memberOf module:webgl-utils
+     */
+    static setUniforms(setters, ...values) {
+        setters = setters.uniformSetters || setters;
+        for (const uniforms of values) {
+            Object.keys(uniforms).forEach(function(name) {
+                const setter = setters[name];
+                if (setter) {
+                    setter(uniforms[name]);
+                }
+            });
+        }
+    }
+    
+    /**
+     * Creates setter functions for all attributes of a shader
+     * program. You can pass this to {@link module:webgl-utils.setBuffersAndAttributes} to set all your buffers and attributes.
+     *
+     * @see {@link module:webgl-utils.setAttributes} for example
+     * @param {WebGLProgram} program the program to create setters for.
+     * @return {Object.<string, function>} an object with a setter for each attribute by name.
+     * @memberOf module:webgl-utils
+     */
+    static createAttributeSetters(gl, program) {
+        const attribSetters = {
+        };
+
+        function createAttribSetter(index) {
+            return function(b) {
+                if (b.value) {
+                    gl.disableVertexAttribArray(index);
+                    switch (b.value.length) {
+                        case 4:
+                            gl.vertexAttrib4fv(index, b.value);
+                            break;
+                        case 3:
+                            gl.vertexAttrib3fv(index, b.value);
+                            break;
+                        case 2:
+                            gl.vertexAttrib2fv(index, b.value);
+                            break;
+                        case 1:
+                            gl.vertexAttrib1fv(index, b.value);
+                            break;
+                        default:
+                            throw new Error('the length of a float constant value must be between 1 and 4!');
+                    }
+                } else {
+                    gl.bindBuffer(gl.ARRAY_BUFFER, b.buffer);
+                    gl.enableVertexAttribArray(index);
+                    gl.vertexAttribPointer(
+                        index, b.numComponents || b.size, b.type || gl.FLOAT, b.normalize || false, b.stride || 0, b.offset || 0
+                    );
+                }
+            };
+        }
+
+        const numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        for (let ii = 0; ii < numAttribs; ++ii) {
+            const attribInfo = gl.getActiveAttrib(program, ii);
+            if (!attribInfo) { break; }
+            const index = gl.getAttribLocation(program, attribInfo.name);
+            attribSetters[attribInfo.name] = createAttribSetter(index);
+        }
+
+        return attribSetters;
+    }
+    
+    /**
+     * Sets attributes and binds buffers (deprecated... use {@link module:webgl-utils.setBuffersAndAttributes})
+     *
+     * Example:
+     *
+     *     let program = createProgramFromScripts(
+     *         gl, ["some-vs", "some-fs"]);
+     *
+     *     let attribSetters = createAttributeSetters(program);
+     *
+     *     let positionBuffer = gl.createBuffer();
+     *     let texcoordBuffer = gl.createBuffer();
+     *
+     *     let attribs = {
+     *       a_position: {buffer: positionBuffer, numComponents: 3},
+     *       a_texcoord: {buffer: texcoordBuffer, numComponents: 2},
+     *     };
+     *
+     *     gl.useProgram(program);
+     *
+     * This will automatically bind the buffers AND set the
+     * attributes.
+     *
+     *     setAttributes(attribSetters, attribs);
+     *
+     * Properties of attribs. For each attrib you can add
+     * properties:
+     *
+     * *   type: the type of data in the buffer. Default = gl.FLOAT
+     * *   normalize: whether or not to normalize the data. Default = false
+     * *   stride: the stride. Default = 0
+     * *   offset: offset into the buffer. Default = 0
+     *
+     * For example if you had 3 value float positions, 2 value
+     * float texcoord and 4 value uint8 colors you'd setup your
+     * attribs like this
+     *
+     *     let attribs = {
+     *       a_position: {buffer: positionBuffer, numComponents: 3},
+     *       a_texcoord: {buffer: texcoordBuffer, numComponents: 2},
+     *       a_color: {
+     *         buffer: colorBuffer,
+     *         numComponents: 4,
+     *         type: gl.UNSIGNED_BYTE,
+     *         normalize: true,
+     *       },
+     *     };
+     *
+     * @param {Object.<string, function>|model:webgl-utils.ProgramInfo} setters Attribute setters as returned from createAttributeSetters or a ProgramInfo as returned {@link module:webgl-utils.createProgramInfo}
+     * @param {Object.<string, module:webgl-utils.AttribInfo>} attribs AttribInfos mapped by attribute name.
+     * @memberOf module:webgl-utils
+     * @deprecated use {@link module:webgl-utils.setBuffersAndAttributes}
+     */
+    static setAttributes(setters, attribs) {
+        setters = setters.attribSetters || setters;
+        Object.keys(attribs).forEach(function(name) {
+            const setter = setters[name];
+            if (setter) {
+                setter(attribs[name]);
+            }
+        });
+    }
+
+    /**
+     * Sets attributes and buffers including the `ELEMENT_ARRAY_BUFFER` if appropriate
+     *
+     * Example:
+     *
+     *     let programInfo = createProgramInfo(
+     *         gl, ["some-vs", "some-fs"]);
+     *
+     *     let arrays = {
+     *       position: { numComponents: 3, data: [0, 0, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0], },
+     *       texcoord: { numComponents: 2, data: [0, 0, 0, 1, 1, 0, 1, 1],                 },
+     *     };
+     *
+     *     let bufferInfo = createBufferInfoFromArrays(gl, arrays);
+     *
+     *     gl.useProgram(programInfo.program);
+     *
+     * This will automatically bind the buffers AND set the
+     * attributes.
+     *
+     *     setBuffersAndAttributes(programInfo.attribSetters, bufferInfo);
+     *
+     * For the example above it is equivilent to
+     *
+     *     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+     *     gl.enableVertexAttribArray(a_positionLocation);
+     *     gl.vertexAttribPointer(a_positionLocation, 3, gl.FLOAT, false, 0, 0);
+     *     gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+     *     gl.enableVertexAttribArray(a_texcoordLocation);
+     *     gl.vertexAttribPointer(a_texcoordLocation, 4, gl.FLOAT, false, 0, 0);
+     *
+     * @param {WebGLRenderingContext} gl A WebGLRenderingContext.
+     * @param {Object.<string, function>} setters Attribute setters as returned from `createAttributeSetters`
+     * @param {module:webgl-utils.BufferInfo} buffers a BufferInfo as returned from `createBufferInfoFromArrays`.
+     * @memberOf module:webgl-utils
+     */
+    static setBuffersAndAttributes(gl, setters, buffers) {
+        webglUtils.setAttributes(setters, buffers.attribs);
+        if (buffers.indices) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+        }
+    }
+
+    static makeTypedArray(array, name) {
+        function isArrayBuffer(a) {
+            return a.buffer && a.buffer instanceof ArrayBuffer;
+        }
+
+        if (isArrayBuffer(array)) {
+            return array;
+        }
+
+        if (array.data && isArrayBuffer(array.data)) {
+            return array.data;
+        }
+
+        if (Array.isArray(array)) {
+            array = {
+            data: array,
+            };
+        }
+
+        if (!array.numComponents) {
+            array.numComponents = guessNumComponentsFromName(name, array.length);
+        }
+
+        let type = array.type;
+        if (!type) {
+            if (name === 'indices') {
+                type = Uint16Array;
+            }
+        }
+        const typedArray = createAugmentedTypedArray(array.numComponents, array.data.length / array.numComponents | 0, type);
+        typedArray.push(array.data);
+        return typedArray;
+    }
+
+    static createBufferFromTypedArray(gl, array, type, drawType) {
+        type = type || gl.ARRAY_BUFFER;
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(type, buffer);
+        gl.bufferData(type, array, drawType || gl.STATIC_DRAW);
+        return buffer;
+    }
+
+    static guessNumComponentsFromName(name, length) {
+        let numComponents;
+        if (name.indexOf('coord') >= 0) {
+            numComponents = 2;
+        } else if (name.indexOf('color') >= 0) {
+            numComponents = 4;
+        } else {
+            numComponents = 3;  // position, normals, indices ...
+        }
+
+        if (length % numComponents > 0) {
+            throw 'can not guess numComponents. You should specify it.';
+        }
+
+        return numComponents;
+    }
+
+    static getGLTypeForTypedArray(gl, typedArray) {
+        if (typedArray instanceof Int8Array)    { return gl.BYTE; }            // eslint-disable-line
+        if (typedArray instanceof Uint8Array)   { return gl.UNSIGNED_BYTE; }   // eslint-disable-line
+        if (typedArray instanceof Int16Array)   { return gl.SHORT; }           // eslint-disable-line
+        if (typedArray instanceof Uint16Array)  { return gl.UNSIGNED_SHORT; }  // eslint-disable-line
+        if (typedArray instanceof Int32Array)   { return gl.INT; }             // eslint-disable-line
+        if (typedArray instanceof Uint32Array)  { return gl.UNSIGNED_INT; }    // eslint-disable-line
+        if (typedArray instanceof Float32Array) { return gl.FLOAT; }           // eslint-disable-line
+        throw 'unsupported typed array type';
+    }
+
+    // This is really just a guess. Though I can't really imagine using
+    // anything else? Maybe for some compression?
+    static getNormalizationForTypedArray(typedArray) {
+        if (typedArray instanceof Int8Array)    { return true; }  // eslint-disable-line
+        if (typedArray instanceof Uint8Array)   { return true; }  // eslint-disable-line
+        return false;
+    }
+
+    /**
+     * Creates a set of attribute data and WebGLBuffers from set of arrays
+     *
+     * Given
+     *
+     *      let arrays = {
+     *        position: { numComponents: 3, data: [0, 0, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0], },
+     *        texcoord: { numComponents: 2, data: [0, 0, 0, 1, 1, 0, 1, 1],                 },
+     *        normal:   { numComponents: 3, data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],     },
+     *        color:    { numComponents: 4, data: [255, 255, 255, 255, 255, 0, 0, 255, 0, 0, 255, 255], type: Uint8Array, },
+     *        indices:  { numComponents: 3, data: [0, 1, 2, 1, 2, 3],                       },
+     *      };
+     *
+     * returns something like
+     *
+     *      let attribs = {
+     *        a_position: { numComponents: 3, type: gl.FLOAT,         normalize: false, buffer: WebGLBuffer, },
+     *        a_texcoord: { numComponents: 2, type: gl.FLOAT,         normalize: false, buffer: WebGLBuffer, },
+     *        a_normal:   { numComponents: 3, type: gl.FLOAT,         normalize: false, buffer: WebGLBuffer, },
+     *        a_color:    { numComponents: 4, type: gl.UNSIGNED_BYTE, normalize: true,  buffer: WebGLBuffer, },
+     *      };
+     *
+     * @param {WebGLRenderingContext} gl The webgl rendering context.
+     * @param {Object.<string, array|typedarray>} arrays The arrays
+     * @param {Object.<string, string>} [opt_mapping] mapping from attribute name to array name.
+     *     if not specified defaults to "a_name" -> "name".
+     * @return {Object.<string, module:webgl-utils.AttribInfo>} the attribs
+     * @memberOf module:webgl-utils
+     */
+    static createAttribsFromArrays(gl, arrays, opt_mapping) {     
+        function allButIndices(name) {
+            return name !== 'indices';
+        }
+        function createMapping(obj) {
+            const mapping = {};
+            Object.keys(obj).filter(allButIndices).forEach(function(key) {
+                mapping['a_' + key] = key;
+            });
+            return mapping;
+        }
+
+        const mapping = opt_mapping || createMapping(arrays);
+        const attribs = {};
+        Object.keys(mapping).forEach(function(attribName) {
+            const bufferName = mapping[attribName];
+            const origArray = arrays[bufferName];
+            if (origArray.value) {
+                attribs[attribName] = {
+                    value: origArray.value,
+                };
+            } else {
+                const array = webglUtils.makeTypedArray(origArray, bufferName);
+                attribs[attribName] = {
+                    buffer:        webglUtils.createBufferFromTypedArray(gl, array),
+                    numComponents: origArray.numComponents || array.numComponents || webglUtils.guessNumComponentsFromName(bufferName),
+                    type:          webglUtils.getGLTypeForTypedArray(gl, array),
+                    normalize:     webglUtils.getNormalizationForTypedArray(array),
+                };
+            }
+        });
+        return attribs;
+    }
+
+    
+    static getArray(array) {
+        return array.length ? array : array.data;
+    }
+
+    static getNumComponents(array, arrayName) {
+        return array.numComponents || array.size || guessNumComponentsFromName(arrayName, getArray(array).length);
+    }
+
+    /**
+     * tries to get the number of elements from a set of arrays.
+     */
+    static positionKeys = ['position', 'positions', 'a_position'];
+    static getNumElementsFromNonIndexedArrays(arrays) {
+        let key;
+        for (const k of webglUtils.positionKeys) {
+            if (k in arrays) {
+                key = k;
+                break;
+            }
+        }
+        key = key || Object.keys(arrays)[0];
+        const array = arrays[key];
+        const length = webglUtils.getArray(array).length;
+        const numComponents = webglUtils.getNumComponents(array, key);
+        const numElements = length / numComponents;
+        if (length % numComponents > 0) {
+            throw new Error(`numComponents ${numComponents} not correct for length ${length}`);
+        }
+        return numElements;
+    }
+
+    /**
+     * Creates a BufferInfo from an object of arrays.
+     *
+     * This can be passed to {@link module:webgl-utils.setBuffersAndAttributes} and to
+     * {@link module:webgl-utils:drawBufferInfo}.
+     *
+     * Given an object like
+     *
+     *     let arrays = {
+     *       position: { numComponents: 3, data: [0, 0, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0], },
+     *       texcoord: { numComponents: 2, data: [0, 0, 0, 1, 1, 0, 1, 1],                 },
+     *       normal:   { numComponents: 3, data: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],     },
+     *       indices:  { numComponents: 3, data: [0, 1, 2, 1, 2, 3],                       },
+     *     };
+     *
+     *  Creates an BufferInfo like this
+     *
+     *     bufferInfo = {
+     *       numElements: 4,        // or whatever the number of elements is
+     *       indices: WebGLBuffer,  // this property will not exist if there are no indices
+     *       attribs: {
+     *         a_position: { buffer: WebGLBuffer, numComponents: 3, },
+     *         a_normal:   { buffer: WebGLBuffer, numComponents: 3, },
+     *         a_texcoord: { buffer: WebGLBuffer, numComponents: 2, },
+     *       },
+     *     };
+     *
+     *  The properties of arrays can be JavaScript arrays in which case the number of components
+     *  will be guessed.
+     *
+     *     let arrays = {
+     *        position: [0, 0, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0],
+     *        texcoord: [0, 0, 0, 1, 1, 0, 1, 1],
+     *        normal:   [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+     *        indices:  [0, 1, 2, 1, 2, 3],
+     *     };
+     *
+     *  They can also by TypedArrays
+     *
+     *     let arrays = {
+     *        position: new Float32Array([0, 0, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0]),
+     *        texcoord: new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]),
+     *        normal:   new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]),
+     *        indices:  new Uint16Array([0, 1, 2, 1, 2, 3]),
+     *     };
+     *
+     *  Or augmentedTypedArrays
+     *
+     *     let positions = createAugmentedTypedArray(3, 4);
+     *     let texcoords = createAugmentedTypedArray(2, 4);
+     *     let normals   = createAugmentedTypedArray(3, 4);
+     *     let indices   = createAugmentedTypedArray(3, 2, Uint16Array);
+     *
+     *     positions.push([0, 0, 0, 10, 0, 0, 0, 10, 0, 10, 10, 0]);
+     *     texcoords.push([0, 0, 0, 1, 1, 0, 1, 1]);
+     *     normals.push([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]);
+     *     indices.push([0, 1, 2, 1, 2, 3]);
+     *
+     *     let arrays = {
+     *        position: positions,
+     *        texcoord: texcoords,
+     *        normal:   normals,
+     *        indices:  indices,
+     *     };
+     *
+     * For the last example it is equivalent to
+     *
+     *     let bufferInfo = {
+     *       attribs: {
+     *         a_position: { numComponents: 3, buffer: gl.createBuffer(), },
+     *         a_texcoods: { numComponents: 2, buffer: gl.createBuffer(), },
+     *         a_normals: { numComponents: 3, buffer: gl.createBuffer(), },
+     *       },
+     *       indices: gl.createBuffer(),
+     *       numElements: 6,
+     *     };
+     *
+     *     gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.attribs.a_position.buffer);
+     *     gl.bufferData(gl.ARRAY_BUFFER, arrays.position, gl.STATIC_DRAW);
+     *     gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.attribs.a_texcoord.buffer);
+     *     gl.bufferData(gl.ARRAY_BUFFER, arrays.texcoord, gl.STATIC_DRAW);
+     *     gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.attribs.a_normal.buffer);
+     *     gl.bufferData(gl.ARRAY_BUFFER, arrays.normal, gl.STATIC_DRAW);
+     *     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferInfo.indices);
+     *     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, arrays.indices, gl.STATIC_DRAW);
+     *
+     * @param {WebGLRenderingContext} gl A WebGLRenderingContext
+     * @param {Object.<string, array|object|typedarray>} arrays Your data
+     * @param {Object.<string, string>} [opt_mapping] an optional mapping of attribute to array name.
+     *    If not passed in it's assumed the array names will be mapped to an attribute
+     *    of the same name with "a_" prefixed to it. An other words.
+     *
+     *        let arrays = {
+     *           position: ...,
+     *           texcoord: ...,
+     *           normal:   ...,
+     *           indices:  ...,
+     *        };
+     *
+     *        bufferInfo = createBufferInfoFromArrays(gl, arrays);
+     *
+     *    Is the same as
+     *
+     *        let arrays = {
+     *           position: ...,
+     *           texcoord: ...,
+     *           normal:   ...,
+     *           indices:  ...,
+     *        };
+     *
+     *        let mapping = {
+     *          a_position: "position",
+     *          a_texcoord: "texcoord",
+     *          a_normal:   "normal",
+     *        };
+     *
+     *        bufferInfo = createBufferInfoFromArrays(gl, arrays, mapping);
+     *
+     * @return {module:webgl-utils.BufferInfo} A BufferInfo
+     * @memberOf module:webgl-utils
+     */
+    static createBufferInfoFromArrays(gl, arrays, opt_mapping) {
+        const bufferInfo = {
+            attribs: webglUtils.createAttribsFromArrays(gl, arrays, opt_mapping),
+        };
+        let indices = arrays.indices;
+        if (indices) {
+            indices = webglUtils.makeTypedArray(indices, 'indices');
+            bufferInfo.indices = webglUtils.createBufferFromTypedArray(gl, indices, gl.ELEMENT_ARRAY_BUFFER);
+            bufferInfo.numElements = indices.length;
+        } else {
+            bufferInfo.numElements = webglUtils.getNumElementsFromNonIndexedArrays(arrays);
+        }
+
+        return bufferInfo;
     }
 };
 
@@ -407,15 +1154,10 @@ class Cube {
 
     // static properties for webgl
     static programInfo;
+    static arraysAndMapping;
     
-    static vertexBuffer;
-    static indexBuffer;
-
-    static textureCoordBuffer;
     static diffuseTexture;
     static specularTexture;
-    
-    static vertexNormalBuffer;
 
     // uNormalMatrix: transpose(inverse(model))
     static vsSource = `
@@ -500,59 +1242,34 @@ class Cube {
 
     // properties for this object
     modelMatrix = mat4.create();
-    textureCoordBuffer;
+    bufferInfo;
+    arraysAndMapping;
     diffuseTexture;
     specularTexture;
 
     constructor(gl, modelMatrix) {
         // set static vars
         if (!Cube.programInfo) {
-            const shaderProgram = webglUtils.initShaderProgram(gl, Cube.vsSource, Cube.fsSource);
+            let shaderProgram = webglUtils.initShaderProgram(gl, Cube.vsSource, Cube.fsSource);
+            let arrays = {
+                position: {numComponents: 3, data: new Float32Array(Cube.vertices), },
+                texcoord: {numComponents: 2, data: new Float32Array(Cube.textureCoordinates), },
+                normal: {numComponents: 3, data: new Float32Array(Cube.vertexNormals), },
+                indices: {numComponents: 3, data: new Uint16Array(Cube.indices), },
+            };
+            let mapping = {
+                "aVertexPosition": "position",
+                "aVertexNormal": "normal",
+                "aTextureCoord": "texcoord",
+            };
+
+            Cube.arraysAndMapping = [arrays, mapping];
             Cube.programInfo = {
                 program: shaderProgram,
-
-                aVertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-                aVertexNormal: gl.getAttribLocation(shaderProgram, "aVertexNormal"),
-                aTextureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
-                
-                uModelMatrix: gl.getUniformLocation(shaderProgram, "uModelMatrix"),
-                uViewMatrix: gl.getUniformLocation(shaderProgram, "uViewMatrix"),
-                uProjectionMatrix: gl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
-                uNormalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
-
-                uViewPosition: gl.getUniformLocation(shaderProgram, "uViewPosition"),
-                uMaterial: {
-                    diffuse: gl.getUniformLocation(shaderProgram, "uMaterial.diffuse"),
-                    specular: gl.getUniformLocation(shaderProgram, "uMaterial.specular"),
-                    shininess: gl.getUniformLocation(shaderProgram, "uMaterial.shininess"),
-                },
-                uLight: {
-                    position: gl.getUniformLocation(shaderProgram, "uLight.position"),
-                    intensity: gl.getUniformLocation(shaderProgram, "uLight.intensity"),
-                    ambient: gl.getUniformLocation(shaderProgram, "uLight.ambient"),
-                    diffuse: gl.getUniformLocation(shaderProgram, "uLight.diffuse"),
-                    specular: gl.getUniformLocation(shaderProgram, "uLight.specular"),
-                },
-            };
-        }
-
-        // position
-        if (!Cube.vertexBuffer) {
-            Cube.vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, Cube.vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Cube.vertices), gl.STATIC_DRAW);
-        }
-        if (!Cube.indexBuffer) {
-            Cube.indexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, Cube.indexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(Cube.indices), gl.STATIC_DRAW);
-        }
-
-        // texture coordinates
-        if (!Cube.textureCoordBuffer) {
-            Cube.textureCoordBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, Cube.textureCoordBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Cube.textureCoordinates), gl.STATIC_DRAW);
+                attribSetters: webglUtils.createAttributeSetters(gl, shaderProgram),
+                uniformSetters: webglUtils.createUniformSetters(gl, shaderProgram),
+                bufferInfo: webglUtils.createBufferInfoFromArrays(gl, arrays, mapping),
+            }
         }
 
         let defaultDiffuseTextureName = "resources/textures/container2.png";
@@ -564,12 +1281,8 @@ class Cube {
             Cube.specularTexture = webglUtils.loadTexture(gl, defaultSpecularTextureName); 
         }
 
-        // normal
-        if (!Cube.vertexNormalBuffer) {
-            Cube.vertexNormalBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, Cube.vertexNormalBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Cube.vertexNormals), gl.STATIC_DRAW);
-        }
+        this.arraysAndMapping = Cube.arraysAndMapping;
+        this.bufferInfo = Cube.programInfo.bufferInfo;
 
         // for object
         if (modelMatrix) mat4.copy(this.modelMatrix, modelMatrix);
@@ -597,55 +1310,15 @@ class Cube {
             this.specularTexture = webglUtils.loadTexture(gl, specularTextureName);
         }
         if (textureCoordinates) {
-            this.textureCoordBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl.STATIC_DRAW);
-        }
-    }
-
-    beforeRender(gl) {
-        // tell WebGL how to pull out the vertices from the position buffer into the aVertexPosition attribute
-        {
-            gl.bindBuffer(gl.ARRAY_BUFFER, Cube.vertexBuffer);
-            // index, size, type, normalized, stride, offset
-            gl.vertexAttribPointer(Cube.programInfo.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(Cube.programInfo.aVertexPosition);
-        }
-
-        // about vertex normal
-        {
-            gl.bindBuffer(gl.ARRAY_BUFFER, Cube.vertexNormalBuffer);
-            gl.vertexAttribPointer(Cube.programInfo.aVertexNormal, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(Cube.programInfo.aVertexNormal);
-        }
-    
-        // tell WebGL which indices to use to index the vertices
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, Cube.indexBuffer);
-    
-        // tell WebGL how to pull out the texture coordinates from the texture coordinate buffer into the textureCoord attribute
-        {
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer || Cube.textureCoordBuffer);
-            // numComponents, type, normalized, stride, offset
-            gl.vertexAttribPointer(Cube.programInfo.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(Cube.programInfo.aTextureCoord);
-        }
-    
-        // tell WebGL to use our program
-        gl.useProgram(Cube.programInfo.program);
-        
-        {
-            // Tell WebGL we want to affect texture unit 0
-            gl.activeTexture(gl.TEXTURE0);
-            // Bind the texture to texture unit 0
-            gl.bindTexture(gl.TEXTURE_2D, this.diffuseTexture || Cube.diffuseTexture);
-            // Tell the shader we bound the texture to texture unit 0
-            gl.uniform1i(Cube.programInfo.uMaterial.diffuse, 0);
-        }
-
-        {    
-            gl.activeTexture(gl.TEXTURE1);
-            gl.bindTexture(gl.TEXTURE_2D, this.specularTexture || Cube.specularTexture);
-            gl.uniform1i(Cube.programInfo.uMaterial.specular, 1);
+            let [arrays, mapping] = this.arraysAndMapping || Cube.arraysAndMapping;
+            let newArrays = {
+                position: arrays.position,
+                texcoord: {numComponents: 2, data: new Float32Array(textureCoordinates), },
+                normal: arrays.normal,
+                indices: arrays.indices,
+            };
+            this.arraysAndMapping = [newArrays, mapping];
+            this.bufferInfo = webglUtils.createBufferInfoFromArrays(gl, newArrays, mapping);
         }
     }
 
@@ -663,21 +1336,30 @@ class Cube {
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, modelMatrix);
         mat4.transpose(normalMatrix, normalMatrix);
-    
-        // set the shader uniforms
-        // location, transpose, data
-        gl.uniformMatrix4fv(Cube.programInfo.uProjectionMatrix, false, projectionMatrix);
-        gl.uniformMatrix4fv(Cube.programInfo.uViewMatrix, false, viewMatrix);
-        gl.uniformMatrix4fv(Cube.programInfo.uModelMatrix, false, modelMatrix);
-        gl.uniformMatrix4fv(Cube.programInfo.uNormalMatrix, false, normalMatrix);
 
-        gl.uniform3fv(Cube.programInfo.uViewPosition, camera.position);
-        gl.uniform1f(Cube.programInfo.uMaterial.shininess, 32.0);
-        gl.uniform3fv(Cube.programInfo.uLight.position, light.position);
-        gl.uniform3fv(Cube.programInfo.uLight.intensity, light.intensity);
-        gl.uniform3fv(Cube.programInfo.uLight.ambient, light.ambient);
-        gl.uniform3fv(Cube.programInfo.uLight.diffuse, light.diffuse);
-        gl.uniform3fv(Cube.programInfo.uLight.specular, light.specular);
+        let uniforms = {
+            uProjectionMatrix: projectionMatrix,
+            uViewMatrix: viewMatrix,
+            uModelMatrix: modelMatrix,
+            uNormalMatrix: normalMatrix,
+
+            uViewPosition: camera.position,
+
+            "uMaterial.diffuse": this.diffuseTexture || Cube.diffuseTexture,
+            "uMaterial.specular": this.specularTexture || Cube.specularTexture,
+            "uMaterial.shininess": 32.0,
+            
+            "uLight.position": light.position,
+            "uLight.intensity": light.intensity,
+            "uLight.ambient": light.ambient,
+            "uLight.diffuse": light.diffuse,
+            "uLight.specular": light.specular,
+        };
+
+        gl.useProgram(Cube.programInfo.program);
+
+        webglUtils.setBuffersAndAttributes(gl, Cube.programInfo.attribSetters, this.bufferInfo || Cube.programInfo.bufferInfo);
+        webglUtils.setUniforms(Cube.programInfo.uniformSetters, uniforms);
     
         // draw elements
         // mode, count, type, offset
@@ -693,8 +1375,7 @@ class Sphere {
     static indices;
 
     static programInfo;
-    static vertexBuffer;
-    static indexBuffer;
+    static arraysAndMapping;
 
     static vsSource = `
         attribute vec4 aVertexPosition;
@@ -717,8 +1398,8 @@ class Sphere {
     ySeg;
     vertices;
     indices;
-    vertexBuffer = null;
-    indexBuffer = null;
+    bufferInfo;
+    arraysAndMapping;
 
     modelMatrix = mat4.create();
 
@@ -730,27 +1411,23 @@ class Sphere {
         }
 
         // shader program
-        const shaderProgram = webglUtils.initShaderProgram(gl, Sphere.vsSource, Sphere.fsSource);
-        Sphere.programInfo = {
-            program: shaderProgram,
+        if (!Sphere.programInfo) {
+            let shaderProgram = webglUtils.initShaderProgram(gl, Sphere.vsSource, Sphere.fsSource);
+            let arrays = {
+                position: {numComponents: 3, data: new Float32Array(Sphere.vertices), },
+                indices: {numComponents: 3, data: new Uint16Array(Sphere.indices), },
+            }
+            let mapping = {
+                "aVertexPosition": "position",
+            }
 
-            aVertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-
-            uModelMatrix: gl.getUniformLocation(shaderProgram, "uModelMatrix"),
-            uViewMatrix: gl.getUniformLocation(shaderProgram, "uViewMatrix"),
-            uProjectionMatrix: gl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
-        }
-        
-        // vertex and index
-        if (!Sphere.vertexBuffer) {
-            Sphere.vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, Sphere.vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Sphere.vertices), gl.STATIC_DRAW);
-        }
-        if (!Sphere.indexBuffer) {
-            Sphere.indexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, Sphere.indexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(Sphere.indices), gl.STATIC_DRAW); // Here is Uint16Array
+            Sphere.arraysAndMapping = [arrays, mapping];
+            Sphere.programInfo = {
+                program: shaderProgram,
+                attribSetters: webglUtils.createAttributeSetters(gl, shaderProgram),
+                uniformSetters: webglUtils.createUniformSetters(gl, shaderProgram),
+                bufferInfo: webglUtils.createBufferInfoFromArrays(gl, arrays, mapping),
+            }
         }
 
         this.xSeg = xSeg || Sphere.xSeg;
@@ -759,20 +1436,12 @@ class Sphere {
         if (this.xSeg != Sphere.xSeg || this.ySeg != Sphere.ySeg) {
             this.vertices = [];
             this.indices = [];
-            Sphere.setSphereShape(this.xSeg, this.ySeg, this.vertices, this.indices);
-
-            this.vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
-
-            this.indexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+            this.setShape(this.xSeg, this.ySeg);
         } else {
             this.vertices = Sphere.vertices;
             this.indices = Sphere.indices;
-            this.vertexBuffer = Sphere.vertexBuffer;
-            this.indexBuffer = Sphere.indexBuffer;
+            this.arraysAndMapping = Sphere.arraysAndMapping;
+            this.bufferInfo = Sphere.programInfo.bufferInfo;
         }
 
         // for object
@@ -788,13 +1457,13 @@ class Sphere {
         this.ySeg = ySeg;
         Sphere.setSphereShape(xSeg, ySeg, this.vertices, this.indices);
 
-        this.vertexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
-
-        this.indexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+        let [arrays, mapping] = this.arraysAndMapping || Sphere.arraysAndMapping;
+        let newArrays = {
+            position: new Float32Array(this.vertices),
+            indices: new Uint16Array(this.indices),
+        }
+        this.arraysAndMapping = [newArrays, mapping];
+        this.bufferInfo = webglUtils.createBufferInfoFromArrays(gl, newArrays, mapping);
     }
 
     setModelMatrix(modelMatrix) {
@@ -803,22 +1472,6 @@ class Sphere {
 
     transform(mat) {
         mat4.mul(this.modelMatrix, mat, this.modelMatrix);
-    }
-
-    beforeRender(gl) {
-        // tell WebGL how to pull out the vertices from the position buffer into the aVertexPosition attribute
-        {
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer || Sphere.vertexBuffer);
-            // index, size, type, normalized, stride, offset
-            gl.vertexAttribPointer(Sphere.programInfo.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(Sphere.programInfo.aVertexPosition);
-        }
-
-        // tell WebGL which indices to use to index the vertices
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer || Sphere.indexBuffer);
-    
-        // tell WebGL to use our program
-        gl.useProgram(Sphere.programInfo.program);
     }
 
     render(gl, camera) {
@@ -830,9 +1483,16 @@ class Sphere {
 
         const modelMatrix = this.modelMatrix;
 
-        gl.uniformMatrix4fv(Sphere.programInfo.uProjectionMatrix, false, projectionMatrix);
-        gl.uniformMatrix4fv(Sphere.programInfo.uViewMatrix, false, viewMatrix);
-        gl.uniformMatrix4fv(Sphere.programInfo.uModelMatrix, false, modelMatrix);
+        let uniforms = {
+            uProjectionMatrix: projectionMatrix,
+            uViewMatrix: viewMatrix,
+            uModelMatrix: modelMatrix,
+        }
+
+        gl.useProgram(Sphere.programInfo.program);
+
+        webglUtils.setBuffersAndAttributes(gl, Sphere.programInfo.attribSetters, this.bufferInfo || Sphere.programInfo.bufferInfo);
+        webglUtils.setUniforms(Sphere.programInfo.uniformSetters, uniforms);
 
         // mode, count, type, offset
         gl.drawElements(gl.TRIANGLES, this.xSeg * this.ySeg * 6, gl.UNSIGNED_SHORT, 0);
@@ -945,6 +1605,9 @@ function main() {
     // draw scene
     var lastTime = 0;
     function render(currTime) {
+        webglUtils.resizeCanvas(gl.canvas);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
         const deltaTime = currTime - lastTime;
         lastTime = currTime;
             
@@ -956,7 +1619,9 @@ function main() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // Clear
 
         objects.forEach(element => {
-            element.beforeRender(gl);
+            if (element.beforeRender) {
+                element.beforeRender(gl);
+            }
             element.render(gl, camera, light);
         });
 

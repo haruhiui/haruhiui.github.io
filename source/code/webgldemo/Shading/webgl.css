@@ -1,7 +1,10 @@
-canvas {
-	border: none;
-	background-color: black;
+body {
+	margin: 0;
+	border: 0;
+	background-color: white;
 }
-video {
-	display: none;
+canvas {
+	width: 100vw;
+	height: 100vh;
+	display: block;
 }

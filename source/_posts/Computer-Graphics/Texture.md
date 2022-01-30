@@ -91,6 +91,8 @@ Mipmap Trilinear Interpolation 也可能出现 Overblur 的现象。原因是 Mi
 | GL_NEAREST | 是OpenGL默认的纹理过滤方式，选择中心点最接近纹理坐标的那个像素 |
 | GL_LINEAR  | 于纹理坐标附近的纹理像素，计算出一个插值，近似出这些纹理像素之间的颜色 |
 
+从最大的贴图中选择 1 个像素或选择4个像素然后混合。
+
 Mipmap 过滤方式：
 
 | Mipmap过滤方式             | 描述                                                         |
@@ -102,7 +104,7 @@ Mipmap 过滤方式：
 
 Mipmap 的过滤方式看起来像是 LINEAR 和 NEAREST 的排列组合。第一个 LINEAR 或 NEAREST 表示的是在一层里面的采样方法，第二个 LINEAR 或 NEAREST 表示要找的是两层纹理中间时选择最近的一层还是对这两层进行线性插值。
 
-要注意 Mipmap （多级渐远纹理）的过滤方式只能用于缩小，不能设置其为放大过滤。
+要注意 Mipmap （多级渐远纹理）的过滤方式只能用于缩小，不能设置其为放大过滤。相反，Mipmap 可以用普通的过滤方式，意义就是一直都选最大的贴图。
 
 缩小都是 LINEAR，放大是 NEAREST 和 LINEAR：
 
@@ -132,7 +134,7 @@ Mipmap 的过滤方式看起来像是 LINEAR 和 NEAREST 的排列组合。第�
 参考资料：
 
 * [MDN WebGL Tutorial: Using textures in WebGL](https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL)
-
 * [LearnOpenGL Textures](https://learnopengl-cn.github.io/01%20Getting%20started/06%20Textures/)
-
 * [纹理映射(Texture Mapping)及Mipmap技术](https://zhuanlan.zhihu.com/p/144332091)
+* [WebGL 三维纹理](https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-textures.html)，重点推荐这里关于纹理过滤方式的演示。
+

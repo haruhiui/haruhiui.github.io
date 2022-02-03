@@ -144,6 +144,8 @@ mat4.invert(viewProjInv, viewProjInv);
 
 记得要清楚移动的部分。js 数组是按列装入 webgl 的，想要清除 webgl 中第四列的前三个，就要清除 js 数组第四行的前三个。
 
+![image-20220130184432032](image-20220130184432032.png)
+
 # 环境贴图
 
 给一个普通的正方体进行环境贴图，要注意是在一个普通的正方体的基础上进行贴图的。
@@ -189,6 +191,8 @@ void main() {
 }
 ```
 
+![image-20220130184519161](image-20220130184519161.png)
+
 # 其他
 
 想起之前在学校上过的图形学课，老师有一个作业是造一个星系。当时做一个地球，贴图是一个南北两级严重变形的平铺图，当时处理的非常不好，现在再用立方体贴图来重新做一下。立方体贴图的好处是没有平铺图那样的变形。
@@ -226,14 +230,19 @@ void main(void) {
 
 片段着色器中用模型矩阵计算这个物体的位置，片段的位置减去物体的位置得到片段的法向量，之后用片段的法向量调用 textureCube 去查询纹理。
 
+![image-20220130184551471](image-20220130184551471.png)
+
+
+
 :::info
 下方是实现效果，点击后，鼠标控制相机方向，wasd控制相机移动，esc取消控制。
 :::
 
 {% iframe "../../code/webgldemo/Cubemaps/index.html" 700 500 %}
 
-（天空盒资源来自 [LearnOpenGL立方体贴图](https://learnopengl-cn.github.io/04%20Advanced%20OpenGL/06%20Cubemaps/)）
+（天空盒资源来自 [LearnOpenGL](https://learnopengl-cn.github.io/04%20Advanced%20OpenGL/06%20Cubemaps/)）
 
+（上方实现效果可能显示出来不完整，可以让上网方式变得更科学一些再试试）
 
 
 参考资料：

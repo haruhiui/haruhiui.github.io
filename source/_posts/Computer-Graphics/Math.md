@@ -16,7 +16,7 @@ typora-root-url: Math
 
 # Vector 
 
-### norm 范数
+## norm 范数
 
 学习资料：[线性代数-范数(2) 向量范数](https://zhuanlan.zhihu.com/p/85305655)
 
@@ -24,19 +24,19 @@ p-norm 定义：
 $$
 \begin{Vmatrix} x \end{Vmatrix} = ( \sum_{i=1}^n |x_i|^p ) ^{1/p}, p > 1
 $$
-常见的 1-norm 就是$\begin{Vmatrix} x \end{Vmatrix}_2 = \sqrt{ \sum_{i=1}^n x_i^2}$ ，2-norm 就是 $\begin{Vmatrix} x \end{Vmatrix}_1 = \sum_{i=1}^n |x_i|$，而 $\infty$-norm 则是 $\begin{Vmatrix} x \end{Vmatrix} _\infty = \max_i{|x_i|}$ 
+常见的 1-norm 就是 $\begin{Vmatrix} x \end{Vmatrix}_1 = \sum_{i=1}^n |x_i|$，2-norm 就是$\begin{Vmatrix} x \end{Vmatrix}_2 = \sqrt{ \sum_{i=1}^n x_i^2}$，而 $\infty$-norm 则是 $\begin{Vmatrix} x \end{Vmatrix} _\infty = \max |x_i|$ 
 
-### dot 点乘
+## dot 点乘
 
 两个向量点乘，可以写成前一个向量的转置成后一个向量：$\bf a \cdot b = a^T b = \it x_a x_b + y_a y_b + z_a z_b$ 
 
 [一个向量乘它的转置，其几何意义是什么？](https://www.zhihu.com/question/40049682)
 
-### cross 叉乘
+## cross 叉乘
 
 向量的叉乘也可以使用叉乘矩阵来表示成一个矩阵和向量乘积的形式：$\bf a \times b = A^* b$​​ 
 
-### 应用
+## 应用
 
 * 定义三角形法向量、计算面积。
 
@@ -76,7 +76,7 @@ $$
 
 # Matrix
 
-### Defination
+## Defination
 
 Symmetric 对称矩阵：以主对角线为对称轴，各元素对应相等的矩阵。$A^T = A$
 

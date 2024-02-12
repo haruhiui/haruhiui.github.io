@@ -21,7 +21,5 @@ date: 2021-11-30 19:01:40
   color: "#e9546b"
 {% endlinks %}
 
-个人项目：
 
-1. [Crosswave](https://github.com/haruhiui/CG-Crosswave)
 

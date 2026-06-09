@@ -1,4 +1,6 @@
 ---
+draft: true
+
 title: 加密文章测试
 date: 2026-02-27
 encrypted: true

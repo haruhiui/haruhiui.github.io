@@ -1,9 +1,10 @@
 ---
+draft: true
 title: Explore the various customization options available in ShokaX theme configuration.
 date: 2025-12-04
 tags: [customization, config, styling]
 categories: ${folder}
-draft: false
+
 ---
 
 # remark 插件综合测试文档

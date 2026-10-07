@@ -25,6 +25,9 @@ async function waitForEnabled(locator: import("@playwright/test").Locator) {
 
 test("@regression 加密文章密码链路：错误提示、正确解密、刷新回到锁定态", async ({ page }) => {
   await page.goto(POSTS.encryptedTest);
+  await expect(
+    page.locator('astro-island[component-url*="/EncryptedPost."]:not([ssr])'),
+  ).toBeAttached();
 
   const passwordInput = page.getByPlaceholder("请输入密码");
   const submitButton = page.getByRole("button", { name: "解密" });
@@ -101,7 +104,7 @@ test("@critical 分页与标签/分类列表进入文章后回退，URL与列表
   const pagePostHref = await pagePostLink.getAttribute("href");
   expect(pagePostHref).toBeTruthy();
   await pagePostLink.click();
-  await expect(page).toHaveURL(/\/posts\/[^/]+\/$/);
+  await expect(page).toHaveURL(pagePostHref ?? "");
 
   await page.goBack();
   await expect(page).toHaveURL(ROUTES.page2);
@@ -116,8 +119,10 @@ test("@critical 分页与标签/分类列表进入文章后回退，URL与列表
   const tagListingUrl = page.url();
   const tagPostLink = page.locator(".timeline article.item.normal .title a").first();
   await expect(tagPostLink).toBeVisible();
+  const tagPostHref = await tagPostLink.getAttribute("href");
+  expect(tagPostHref).toBeTruthy();
   await tagPostLink.click();
-  await expect(page).toHaveURL(/\/posts\/[^/]+\/$/);
+  await expect(page).toHaveURL(tagPostHref ?? "");
 
   await page.goBack();
   await expect(page).toHaveURL(tagListingUrl);
@@ -132,8 +137,10 @@ test("@critical 分页与标签/分类列表进入文章后回退，URL与列表
   const categoryListingUrl = page.url();
   const categoryPostLink = page.locator(".timeline article.item.normal .title a").first();
   await expect(categoryPostLink).toBeVisible();
+  const categoryPostHref = await categoryPostLink.getAttribute("href");
+  expect(categoryPostHref).toBeTruthy();
   await categoryPostLink.click();
-  await expect(page).toHaveURL(/\/posts\/[^/]+\/$/);
+  await expect(page).toHaveURL(categoryPostHref ?? "");
 
   await page.goBack();
   await expect(page).toHaveURL(categoryListingUrl);

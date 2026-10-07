@@ -11,8 +11,23 @@ test("@regression 导航栏入口与随机文章按钮可用", async ({ page }) 
   await expect(page).toHaveURL(/\/friends\/$/);
 
   await page.goto(ROUTES.home);
+  const randomResponse = await page.request.get("/random/");
+  expect(randomResponse.ok()).toBeTruthy();
+  const postUrls = await page.evaluate(
+    (html) => {
+      const document = new DOMParser().parseFromString(html, "text/html");
+      const raw = document.querySelector<HTMLElement>(".random-page")?.dataset.postUrls ?? "[]";
+      const urls: unknown = JSON.parse(raw);
+      return Array.isArray(urls)
+        ? urls.filter((url): url is string => typeof url === "string")
+        : [];
+    },
+    await randomResponse.text(),
+  );
+  expect(postUrls.length).toBeGreaterThan(0);
   await page.locator('#nav a[href="/random/"]').click();
-  await expect(page).toHaveURL(/\/posts\/[^/]+\/$/);
+  await expect.poll(() => postUrls.includes(new URL(page.url()).pathname)).toBe(true);
+  await expect(page.locator("article.post")).toBeVisible();
 });
 
 test("@regression 移动端侧边栏可通过导航按钮与遮罩开关", async ({ page }) => {

@@ -9,6 +9,10 @@ async function measureMainOffset(page: import("@playwright/test").Page) {
 }
 
 async function openSearchDialog(page: import("@playwright/test").Page) {
+  await expect(page.locator('astro-island[component-url*="/NavBar."]:not([ssr])')).toBeAttached();
+  await expect(
+    page.locator('astro-island[component-url*="/SearchPage."]:not([ssr])'),
+  ).toBeAttached();
   const openSearchButton = page.locator("#search");
   const searchDialog = page.getByRole("dialog", { name: "Search" });
 
@@ -16,18 +20,7 @@ async function openSearchDialog(page: import("@playwright/test").Page) {
     return searchDialog;
   }
 
-  /* eslint-disable no-await-in-loop */
-  for (let attempt = 0; attempt < 6; attempt += 1) {
-    await openSearchButton.click({ force: true });
-
-    if (await searchDialog.isVisible()) {
-      return searchDialog;
-    }
-
-    await page.waitForTimeout(150);
-  }
-  /* eslint-enable no-await-in-loop */
-
+  await openSearchButton.click();
   await expect(searchDialog).toBeVisible();
   return searchDialog;
 }

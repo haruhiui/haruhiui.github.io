@@ -7,6 +7,8 @@ const BASE_URL = `http://${PREVIEW_HOST}:${PREVIEW_PORT}`;
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
+  // 控制浏览器并发，避免加载静态资源与组件时耗尽运行器资源。
+  workers: 2,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 3 : 0,
   reporter: [["list"], ["html", { open: "never" }]],

@@ -7,6 +7,7 @@
     "build:site": "bunx --bun astro build",
     "build:index": "bunx --bun pagefind --site ./dist",
     "build": "bun run build:site && bun run build:index",
+    "build:e2e": "BLOG_E2E_FIXTURES=1 bun run build",
     "preview": "bunx --bun astro preview",
     "astro": "bunx --bun astro",
     "check": "bunx --bun astro check --root . && bunx --bun svelte-check",

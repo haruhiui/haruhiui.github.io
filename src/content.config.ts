@@ -2,13 +2,17 @@ import { glob } from "astro/loaders";
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 import { FOLDER_CATEGORY_TOKEN, withFolderCategories } from "./toolkit/posts/folderCategories";
+import { withE2eFixtures } from "./toolkit/posts/e2eFixtures";
 
 const posts = defineCollection({
-  loader: withFolderCategories(
-    glob({
-      pattern: "**/*.{md,mdx}",
-      base: "src/posts",
-    }),
+  loader: withE2eFixtures(
+    withFolderCategories(
+      glob({
+        pattern: "**/*.{md,mdx}",
+        base: "src/posts",
+      }),
+    ),
+    process.env.BLOG_E2E_FIXTURES === "1",
   ),
   schema: ({ image }) =>
     z.object({
